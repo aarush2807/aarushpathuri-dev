@@ -156,8 +156,8 @@ const Navbar = ({ activePage, setActivePage, theme }) => {
   };
 
   return (
-    <nav className="flex flex-wrap items-center justify-between mb-16 md:mb-24 relative z-50">
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+    <nav className="flex items-center relative z-50">
+      <div className="flex flex-wrap items-center gap-x-5 md:gap-x-6 gap-y-2">
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -209,11 +209,6 @@ const Navbar = ({ activePage, setActivePage, theme }) => {
             </div>
           )}
         </div>
-      </div>
-      
-      <div className="hidden md:flex gap-x-6 text-sm text-slate-400">
-        <span className="hover:text-slate-600 cursor-default transition-colors">life +</span>
-        <span className="hover:text-slate-600 cursor-default transition-colors">stats +</span>
       </div>
     </nav>
   );
@@ -367,14 +362,9 @@ const WanderPlaceholder = ({ theme, onBack }) => (
 
 export default function App() {
   const [activePage, setActivePage] = useState('home');
-  const [theme, setTheme] = useState('light'); // 'light', 'sunset', 'dark'
+  // Defaulting to light mode as requested
+  const [theme, setTheme] = useState('light'); 
   const [weatherType, setWeatherType] = useState('none');
-
-  useEffect(() => {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-    }
-  }, []);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -432,10 +422,13 @@ export default function App() {
     <div className={`min-h-screen transition-all duration-700 ${getThemeStyles()}`}>
       <WeatherEffect theme={theme} type={weatherType} />
       
-      <div className="max-w-3xl mx-auto px-6 py-12 md:py-24 selection:bg-orange-100 selection:text-orange-900 relative z-10">
+      {/* Reduced vertical padding to move everything higher up */}
+      <div className="max-w-3xl mx-auto px-6 py-8 md:py-16 selection:bg-orange-100 selection:text-orange-900 relative z-10">
         
-        <header>
-          <div className="flex justify-end mb-8 gap-2">
+        <header className="flex items-center justify-between mb-12 md:mb-20">
+          <Navbar activePage={activePage} setActivePage={setActivePage} theme={theme} />
+          
+          <div className="flex items-center gap-1 md:gap-2">
             <button 
               onClick={cycleWeather}
               className={`p-2 rounded-full transition-all duration-300 ${weatherType !== 'none' ? 'text-orange-500 bg-orange-50 dark:bg-orange-900/20' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800'}`}
@@ -451,7 +444,6 @@ export default function App() {
               {getThemeIcon()}
             </button>
           </div>
-          <Navbar activePage={activePage} setActivePage={setActivePage} theme={theme} />
         </header>
 
         <main className="min-h-[60vh]">
