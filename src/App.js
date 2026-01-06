@@ -3,7 +3,6 @@ import {
   ArrowRight, 
   Mail, 
   Github, 
-  Twitter, 
   Linkedin, 
   Rss, 
   MapPin, 
@@ -18,6 +17,27 @@ import {
   ArrowLeft,
   ChevronDown
 } from 'lucide-react';
+
+/**
+ * To prevent the "Could not resolve ./data/posts.json" error in this preview,
+ * we've defined the initial posts directly here. 
+ * On your GitHub, you can still use the import if you prefer, 
+ * but keeping them in a constant ensures the site always loads.
+ */
+const INITIAL_POSTS = [
+  {
+    "date": "Jan 6, 2026",
+    "title": "The First Post: Setting Up the Site",
+    "readTime": "2 min read",
+    "description": "A quick look at the process of building this minimalist, weather-reactive portfolio using React and Tailwind."
+  },
+  {
+    "date": "Jan 5, 2026",
+    "title": "Why Sports Analytics Matters",
+    "readTime": "5 min read",
+    "description": "Diving into how data is changing the way we perceive efficiency on the basketball court and the baseball diamond."
+  }
+];
 
 // --- Components ---
 
@@ -235,9 +255,7 @@ const WritingItem = ({ date, title, readTime, description, theme }) => (
 
 // --- Pages ---
 
-const Home = ({ setActivePage, theme }) => {
-  const writings = [];
-
+const Home = ({ setActivePage, theme, posts }) => {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 relative z-10">
       <section className="mb-20">
@@ -264,8 +282,8 @@ const Home = ({ setActivePage, theme }) => {
           </button>
         </div>
         <div>
-          {writings.length > 0 ? (
-            writings.map((w, idx) => <WritingItem key={idx} {...w} theme={theme} />)
+          {posts && posts.length > 0 ? (
+            posts.slice(0, 3).map((post, idx) => <WritingItem key={idx} {...post} theme={theme} />)
           ) : (
             <p className="text-sm text-slate-400 italic">No posts yet. Check back soon.</p>
           )}
@@ -275,16 +293,26 @@ const Home = ({ setActivePage, theme }) => {
       <section className="mb-20">
         <h2 className={`text-xs uppercase tracking-[0.2em] font-bold text-slate-400 mb-10 border-b pb-4 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>elsewhere</h2>
         <div className="flex flex-wrap gap-6">
-          <a href="#" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-orange-500' : 'text-slate-400 hover:text-blue-500'}`}>
+          <a 
+            href="mailto:aarushvpathuri2807@gmail.com" 
+            className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-orange-500' : 'text-slate-400 hover:text-blue-500'}`}
+          >
             <Mail className="w-4 h-4" /> email
           </a>
-          <a href="#" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
+          <a 
+            href="https://github.com/aarush2807" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+          >
             <Github className="w-4 h-4" /> github
           </a>
-          <a href="#" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-400' : 'text-slate-400 hover:text-blue-400'}`}>
-            <Twitter className="w-4 h-4" /> twitter
-          </a>
-          <a href="#" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-700' : 'text-slate-400 hover:text-blue-700'}`}>
+          <a 
+            href="https://www.linkedin.com/in/aarush-pathuri-b943b0265/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-700' : 'text-slate-400 hover:text-blue-700'}`}
+          >
             <Linkedin className="w-4 h-4" /> linkedin
           </a>
         </div>
@@ -310,17 +338,20 @@ const About = ({ theme }) => (
       <p>
         When I’m not focused on the field, I enjoy <strong>good media</strong>. 
         I appreciate well-crafted stories and engaging visual experiences, whatever the format. 
-        I like content that stands on its own and gives you something to think about once it's over.
       </p>
     </div>
   </div>
 );
 
-const Blog = () => (
+const Blog = ({ theme, posts }) => (
   <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10">
-    <h2 className="text-2xl font-semibold mb-12 text-slate-900 dark:text-white tracking-tight">all writing</h2>
+    <h2 className={`text-2xl font-semibold mb-12 tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>all writing</h2>
     <div className="space-y-12">
-      <p className="text-slate-500 dark:text-slate-400 italic">There are no archived posts yet.</p>
+      {posts && posts.length > 0 ? (
+        posts.map((post, idx) => <WritingItem key={idx} {...post} theme={theme} />)
+      ) : (
+        <p className="text-slate-500 dark:text-slate-400 italic">There are no archived posts yet.</p>
+      )}
     </div>
   </div>
 );
@@ -362,9 +393,9 @@ const WanderPlaceholder = ({ theme, onBack }) => (
 
 export default function App() {
   const [activePage, setActivePage] = useState('home');
-  // Defaulting to light mode as requested
   const [theme, setTheme] = useState('light'); 
   const [weatherType, setWeatherType] = useState('none');
+  const [blogPosts, setBlogPosts] = useState(INITIAL_POSTS);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -405,10 +436,10 @@ export default function App() {
   const renderPage = () => {
     switch(activePage) {
       case 'about': return <About theme={theme} />;
-      case 'blog': return <Blog />;
+      case 'blog': return <Blog theme={theme} posts={blogPosts} />;
       case 'now': return <Now theme={theme} />;
       case 'wander-placeholder': return <WanderPlaceholder theme={theme} onBack={() => setActivePage('home')} />;
-      default: return <Home setActivePage={setActivePage} theme={theme} />;
+      default: return <Home setActivePage={setActivePage} theme={theme} posts={blogPosts} />;
     }
   };
 
@@ -422,7 +453,6 @@ export default function App() {
     <div className={`min-h-screen transition-all duration-700 ${getThemeStyles()}`}>
       <WeatherEffect theme={theme} type={weatherType} />
       
-      {/* Reduced vertical padding to move everything higher up */}
       <div className="max-w-3xl mx-auto px-6 py-8 md:py-16 selection:bg-orange-100 selection:text-orange-900 relative z-10">
         
         <header className="flex items-center justify-between mb-12 md:mb-20">
