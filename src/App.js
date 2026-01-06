@@ -175,7 +175,6 @@ const Navbar = ({ activePage, setActivePage, theme }) => {
           </button>
         ))}
         
-        {/* Wander Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button 
             onClick={() => setIsWanderOpen(!isWanderOpen)}
@@ -315,7 +314,6 @@ const About = ({ theme }) => (
       <p>
         When I’m not focused on the field, I enjoy <strong>good media</strong>. 
         I appreciate well-crafted stories and engaging visual experiences, whatever the format. 
-        I like content that stands on its own and gives you something to think about once it's over.
       </p>
     </div>
   </div>
