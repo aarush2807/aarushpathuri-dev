@@ -22,7 +22,8 @@ import {
   ArrowLeft,
   ChevronDown,
   Star,
-  StarHalf
+  StarHalf,
+  ExternalLink
 } from 'lucide-react';
 
 import posts from './posts.json';
@@ -45,7 +46,6 @@ const RatingStars = ({ rating, theme }) => {
 
 const WeatherEffect = ({ theme, type }) => {
   const canvasRef = useRef(null);
-  
   useEffect(() => {
     if (type === 'none') return;
     const canvas = canvasRef.current;
@@ -56,12 +56,10 @@ const WeatherEffect = ({ theme, type }) => {
       canvas.width = window.innerWidth; 
       canvas.height = window.innerHeight; 
     };
-    
     window.addEventListener('resize', resize);
     resize();
 
     const particles = [];
-    // Increased particle count for better visibility
     const count = 160;
 
     const createParticle = () => {
@@ -71,16 +69,16 @@ const WeatherEffect = ({ theme, type }) => {
           y: Math.random() * canvas.height,
           length: Math.random() * 22 + 12,
           speed: Math.random() * 10 + 8,
-          opacity: Math.random() * 0.4 + 0.2 // Higher base opacity
+          opacity: Math.random() * 0.4 + 0.2
         };
       } else if (type === 'snow') {
         return {
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: Math.random() * 3.5 + 1.5, // Slightly larger flakes
+          radius: Math.random() * 3.5 + 1.5,
           speed: Math.random() * 1.2 + 0.6,
           wind: Math.random() * 1.2 - 0.6,
-          opacity: Math.random() * 0.6 + 0.4 // Higher base opacity
+          opacity: Math.random() * 0.6 + 0.4
         };
       }
       return null;
@@ -99,7 +97,7 @@ const WeatherEffect = ({ theme, type }) => {
         ctx.beginPath();
         if (type === 'rain') {
           ctx.strokeStyle = `rgba(${color}, ${p.opacity})`;
-          ctx.lineWidth = 1.5; // Slightly thicker lines
+          ctx.lineWidth = 1.5;
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(p.x, p.y + p.length);
           ctx.stroke();
@@ -127,7 +125,6 @@ const WeatherEffect = ({ theme, type }) => {
   }, [theme, type]);
 
   if (type === 'none') return null;
-  // Increased global opacity from 40 to 65 for better overall presence
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-65" />;
 };
 
@@ -220,6 +217,62 @@ const Navbar = ({ theme }) => {
 };
 
 // --- Pages ---
+
+const Colophon = ({ theme }) => (
+  <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 relative z-10 max-w-2xl">
+    <h2 className={`text-2xl font-semibold mb-6 tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>colophon</h2>
+    
+    <div className={`space-y-8 leading-relaxed ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-400'}`}>
+      <section>
+        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>tech stack</h3>
+        <p className="text-sm">
+          This project is built using <strong>React</strong> for the user interface and <strong>Tailwind CSS</strong> for styling. I chose React for its component-based architecture, which allows for clean state management across the different themes and weather effects.
+        </p>
+      </section>
+
+      <section>
+        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>deployment</h3>
+        <p className="text-sm">
+          The site is hosted on <strong>Vercel</strong>. It is continuously deployed from a GitHub repository, ensuring that every push to the main branch is instantly live. This setup provides a fast, edge-cached experience worldwide.
+        </p>
+        <a 
+          href="https://github.com/aarush2807/aarushpathuri-dev/tree/main" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline group"
+        >
+          <Github size={14} /> View on GitHub <ExternalLink size={10} className="opacity-50" />
+        </a>
+      </section>
+
+      <section>
+        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>privacy</h3>
+        <p className="text-sm italic">
+          No tracking. No cookies. No analytics. 
+        </p>
+        <p className="text-sm mt-2">
+          This website is a strictly static experience. I don't collect your data, I don't know who you are, and I prefer it that way. The "no tracking" badge in the corner isn't just for show—it's a fundamental principle of how I build for the web.
+        </p>
+      </section>
+
+      <section>
+        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>features</h3>
+        <p className="text-sm">
+          <strong>Themes:</strong> The site features three modes—Light, Dark, and Sunset—designed to adapt to different environments and moods.
+          <br /><br />
+          <strong>Weather:</strong> The rain and snow effects are rendered on a custom HTML5 Canvas element. It's a lightweight particle system that runs in the background without affecting performance.
+        </p>
+      </section>
+
+      <section>
+        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>future goals</h3>
+        <p className="text-sm">
+          I plan to expand the "Wander" section with interactive sports datasets and specialized dashboards for NBA and NFL analysis. I also intend to integrate a more robust film archive as my log grows.
+        </p>
+      </section>
+    </div>
+  </div>
+);
 
 const Home = ({ theme, posts }) => (
   <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 relative z-10">
@@ -334,16 +387,13 @@ export default function App() {
     const root = document.documentElement;
     const body = document.body;
     
-    // Find or create the theme-color meta tag for browser UI (Safari bar, etc)
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    let metaThemeColor = document.querySelector('meta[name=\"theme-color\"]');
     if (!metaThemeColor) {
       metaThemeColor = document.createElement('meta');
       metaThemeColor.setAttribute('name', 'theme-color');
       document.head.appendChild(metaThemeColor);
     }
 
-    // Manage document-level theme classes and background colors
-    // We apply background to BOTH html and body to kill the white overscroll gap
     if (theme === 'dark') {
       root.classList.add('dark');
       root.style.backgroundColor = '#0a0a0a';
@@ -400,13 +450,20 @@ export default function App() {
             <Route path="/blog/:id" element={<Article theme={theme} posts={posts} />} />
             <Route path="/now" element={<Now theme={theme} />} />
             <Route path="/films" element={<FilmLog theme={theme} />} />
+            <Route path="/colophon" element={<Colophon theme={theme} />} />
             <Route path="/wander" element={<WanderPlaceholder theme={theme} />} />
           </Routes>
         </main>
 
-        <footer className="mt-20 pt-8 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-[11px] uppercase tracking-widest font-mono text-slate-400">
-          <div className="flex gap-6"><a href="#">colophon</a><a href="#">changelog</a></div>
-          <div className="flex items-center gap-1"><MapPin size={10} /> bloomington, 2026</div>
+        <footer className={`mt-20 pt-8 border-t flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px] uppercase tracking-widest font-mono text-slate-400">
+            <Link to="/colophon" className="hover:text-slate-900 dark:hover:text-white transition-colors">colophon</Link>
+            <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">changelog</a>
+            <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">rss</a>
+          </div>
+          <div className="flex items-center gap-4 text-[11px] uppercase tracking-widest font-mono text-slate-400">
+            <span className="flex items-center gap-1"><MapPin size={10} /> bloomington, 2026</span>
+          </div>
         </footer>
       </div>
     </div>
