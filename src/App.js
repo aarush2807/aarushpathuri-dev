@@ -221,21 +221,54 @@ const Navbar = ({ theme }) => {
 const Colophon = ({ theme }) => (
   <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 relative z-10 max-w-2xl">
     <h2 className={`text-2xl font-semibold mb-6 tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>colophon</h2>
+
     <div className={`space-y-8 leading-relaxed ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-400'}`}>
       <section>
         <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>tech stack</h3>
-        <p className="text-sm">Built with React, Tailwind CSS, and Lucide icons.</p>
+        <p className="text-sm">
+          This project is built using <strong>React</strong> for the user interface and <strong>Tailwind CSS</strong> for styling. I chose React for its component-based architecture, which allows for clean state management across the different themes and weather effects.
+        </p>
       </section>
+
       <section>
         <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>deployment</h3>
-        <p className="text-sm">Hosted on Vercel with continuous deployment from GitHub.</p>
-        <a href="https://github.com/aarush2807/aarushpathuri-dev/tree/main" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline group">
+        <p className="text-sm">
+          The site is hosted on <strong>Vercel</strong>. It is continuously deployed from a GitHub repository, ensuring that every push to the main branch is instantly live. This setup provides a fast, edge-cached experience worldwide.
+        </p>
+        <a 
+          href="https://github.com/aarush2807/aarushpathuri-dev/tree/main" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline group"
+        >
           <Github size={14} /> View on GitHub <ExternalLink size={10} className="opacity-50" />
         </a>
       </section>
+
       <section>
         <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>privacy</h3>
-        <p className="text-sm italic">No tracking. No cookies. No analytics.</p>
+        <p className="text-sm italic">
+          No tracking. No cookies. No analytics. 
+        </p>
+        <p className="text-sm mt-2">
+          This website is a strictly static experience. I don't collect your data, I don't know who you are, and I prefer it that way. The "no tracking" badge in the corner isn't just for show—it's a fundamental principle of how I build for the web.
+        </p>
+      </section>
+
+      <section>
+        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>features</h3>
+        <p className="text-sm">
+          <strong>Themes:</strong> The site features three modes—Light, Dark, and Sunset—designed to adapt to different environments and moods.
+          <br /><br />
+          <strong>Weather:</strong> The rain and snow effects are rendered on a custom HTML5 Canvas element. It's a lightweight particle system that runs in the background without affecting performance.
+        </p>
+      </section>
+
+      <section>
+        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>future goals</h3>
+        <p className="text-sm">
+          I plan to expand the "Wander" section with interactive sports datasets and specialized dashboards for NBA and NFL analysis. I also intend to integrate a more robust film archive as my log grows.
+        </p>
       </section>
     </div>
   </div>
