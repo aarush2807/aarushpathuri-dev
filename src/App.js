@@ -27,16 +27,17 @@ import {
 const INITIAL_POSTS = [
   {
     "date": "Jan 6, 2026",
+    "title": "The Impact of Analytics: Beyond the Box Score",
+    "readTime": "4 min read",
+    "description": "An exploration of why raw scoring isn't everything in the NBA. Comparing the offensive gravity of stars like Zach LaVine to the 'glue' impact of role players like Alex Caruso and Jrue Holiday."
+  },
+  {
+    "date": "Jan 6, 2026",
     "title": "The First Post: Setting Up the Site",
     "readTime": "2 min read",
     "description": "A quick look at the process of building this minimalist, weather-reactive portfolio using React and Tailwind."
   },
-  {
-    "date": "Jan 5, 2026",
-    "title": "Why Sports Analytics Matters",
-    "readTime": "5 min read",
-    "description": "Diving into how data is changing the way we perceive efficiency on the basketball court and the baseball diamond."
-  }
+
 ];
 
 // --- Components ---
