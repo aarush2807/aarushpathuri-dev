@@ -10,7 +10,7 @@ import {
 import { 
   ArrowRight, 
   Mail, 
-  Github,
+  Github, 
   Linkedin, 
   MapPin, 
   Sun,
@@ -23,24 +23,8 @@ import {
   ChevronDown
 } from 'lucide-react';
 
-const INITIAL_POSTS = [
-  {
-    "id": "nba-analytics-2026",
-    "date": "Jan 6, 2026",
-    "title": "The Impact of Analytics: Beyond the Box Score",
-    "readTime": "4 min read",
-    "description": "An exploration of why raw scoring isn't everything in the NBA. Comparing the offensive gravity of stars like Zach LaVine to the 'glue' impact of role players like Alex Caruso and Jrue Holiday.",
-    "content": `Imagine you are an NBA general manager and you have to choose between two players. Player A is an offensive flamethrower. He is averaging 20 points, 5 rebounds, and 5 assists. He has the highlights, the athleticism, and the star label. Player B looks like a bench warmer on paper. He averages 10 points and 3 assists. If you look at the box score after a game, Player A is the one getting the headlines.\n\nBut if you look at the win column, everything flips. In the 2023 season, Zach LaVine (Player A) often saw the Chicago Bulls play better while he was on the bench. He had a staggering negative 18.8 On/Off rating at one point. This means the team was nearly 19 points better per 100 possessions when their star sat down. Meanwhile, Alex Caruso (Player B) was the heartbeat of the team. Caruso did not just have a positive net rating; he had a positive net rating with almost every single teammate he shared the floor with.\n\nThis is the fundamental shift in how we perceive basketball. Analytics has taught us that a star who scores 20 but is a cone on defense is often less valuable than a role player who shuts down the other team's best scorer. A player who stands still while opponents blow past him is a liability regardless of his scoring average.\n\nThe internet often debates who is the better hooper, but the better question is how does this player scale. The 2021 Brooklyn Nets are the ultimate cautionary tale of the engine problem. On paper, having Kevin Durant, James Harden, and Kyrie Irving was a cheat code. They had three of the greatest offensive engines in history.\n\nThe problem is that a basketball game only has one ball and 100 possessions. When you have three players who all need a 30 percent usage rate to be effective, you reach a point of diminishing returns. Analytics showed that while their offensive rating was historic, their defensive infrastructure was non-existent. They were all engines and no grease.\n\nBecause they lacked glue guys like Caruso, the team was fragile. These are players who are happy to have a 10 percent usage rate but provide 100 percent effort on the margins. When one engine stalled due to injury, the whole machine collapsed. They had not built a system that valued efficiency and defense over raw point totals.\n\nCompare the Nets to the 2021 Milwaukee Bucks, the very same that eliminated them. Before they traded for Jrue Holiday, the Bucks were a regular season powerhouse that struggled in the playoffs. They replaced Eric Bledsoe with Holiday. While Holiday's raw scoring numbers were not always massive, his impact was astronomical.\n\nIn the 2021 NBA Finals, Jrue Holiday had games where he shot 4 for 20. In the old days, fans would have called for his head. But the analytics told a different story. Even when his shot was not falling, his defensive presence was so suffocating that he was a plus 15 on the floor. He won possession after possession on the margins. He produced screen assists and forced deflections. He stayed attached to the opponent's best player like glue.\n\nThe Bucks won that championship because they realized that surrounding a superstar like Giannis with hyper-efficient connectors is more valuable than adding a second high-volume, low-defense scorer. They traded for a guy who could score 27 in a Game 5 but was just as happy to score 12 if it meant getting the win.\n\nWe used to live in a world of what ifs and eye tests. We used to argue that a guy was good just because he looked like a star. Analytics has killed that era. We now know that a player can average 20 points and 10 rebounds while being the reason their team loses. If those 20 points come on 45 percent true shooting and those 10 rebounds are uncontested, that player is a ghost in the machine.\n\nThe box score is a skeleton, but analytics is the flesh and blood of the game. It tells us that basketball is not about who can put the ball in the hoop the most. It is about who can maximize the value of every single second they spend on the floor.`
-  },
-  {
-    "id": "setting-up-2026",
-    "date": "Jan 6, 2026",
-    "title": "The First Post: Setting Up the Site",
-    "readTime": "2 min read",
-    "description": "A quick look at the process of building this minimalist, weather-reactive portfolio using React and Tailwind.",
-    "content": "Welcome to my new personal site. This project was born out of a desire for a clean, typography-focused space to share thoughts on sports, data, and media. Built with React and Tailwind CSS, it features a dynamic weather system and three distinct themes (Light, Dark, and Sunset). I'll be using this space to document my projects and share my findings in the world of sports analytics."
-  }
-];
+// Importing your articles from the JSON file
+import posts from './posts.json';
 
 // --- Sub-components ---
 
@@ -402,10 +386,10 @@ export default function App() {
 
         <main className="min-h-[50vh]">
           <Routes>
-            <Route path="/" element={<Home theme={theme} posts={INITIAL_POSTS} />} />
+            <Route path="/" element={<Home theme={theme} posts={posts} />} />
             <Route path="/about" element={<About theme={theme} />} />
-            <Route path="/blog" element={<Blog theme={theme} posts={INITIAL_POSTS} />} />
-            <Route path="/blog/:id" element={<Article theme={theme} posts={INITIAL_POSTS} />} />
+            <Route path="/blog" element={<Blog theme={theme} posts={posts} />} />
+            <Route path="/blog/:id" element={<Article theme={theme} posts={posts} />} />
             <Route path="/now" element={<Now theme={theme} />} />
             <Route path="/wander" element={<WanderPlaceholder theme={theme} />} />
           </Routes>
