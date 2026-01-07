@@ -19,25 +19,49 @@ import {
 } from 'lucide-react';
 
 /**
- * To prevent the "Could not resolve ./data/posts.json" error in this preview,
- * we've defined the initial posts directly here. 
- * On your GitHub, you can still use the import if you prefer, 
- * but keeping them in a constant ensures the site always loads.
+ * We've added a 'content' field to the posts so they can be read in full.
  */
 const INITIAL_POSTS = [
   {
+    "id": "nba-analytics-2026",
     "date": "Jan 6, 2026",
     "title": "The Impact of Analytics: Beyond the Box Score",
     "readTime": "4 min read",
-    "description": "An exploration of why raw scoring isn't everything in the NBA. Comparing the offensive gravity of stars like Zach LaVine to the 'glue' impact of role players like Alex Caruso and Jrue Holiday."
+    "description": "An exploration of why raw scoring isn't everything in the NBA. Comparing the offensive gravity of stars like Zach LaVine to the 'glue' impact of role players like Alex Caruso and Jrue Holiday.",
+    "content": `
+Imagine you are an NBA general manager and you have to choose between two players. Player A is an offensive flamethrower. He is averaging 20 points, 5 rebounds, and 5 assists. He has the highlights, the athleticism, and the star label. Player B looks like a bench warmer on paper. He averages 10 points and 3 assists. If you look at the box score after a game, Player A is the one getting the headlines.
+
+But if you look at the win column, everything flips. In the 2023 season, Zach LaVine (Player A) often saw the Chicago Bulls play better while he was on the bench. He had a staggering negative 18.8 On/Off rating at one point. This means the team was nearly 19 points better per 100 possessions when their star sat down. Meanwhile, Alex Caruso (Player B) was the heartbeat of the team. Caruso did not just have a positive net rating; he had a positive net rating with almost every single teammate he shared the floor with.
+
+This is the fundamental shift in how we perceive basketball. Analytics has taught us that a star who scores 20 but is a cone on defense is often less valuable than a role player who shuts down the other team's best scorer. A player who stands still while opponents blow past him is a liability regardless of his scoring average.
+
+### The Engine Problem
+The internet often debates who is the better hooper, but the better question is how does this player scale. The 2021 Brooklyn Nets are the ultimate cautionary tale of the engine problem. On paper, having Kevin Durant, James Harden, and Kyrie Irving was a cheat code. They had three of the greatest offensive engines in history.
+
+The problem is that a basketball game only has one ball and 100 possessions. When you have three players who all need a 30 percent usage rate to be effective, you reach a point of diminishing returns. Analytics showed that while their offensive rating was historic, their defensive infrastructure was non-existent. They were all engines and no grease.
+
+Because they lacked glue guys like Caruso, the team was fragile. These are players who are happy to have a 10 percent usage rate but provide 100 percent effort on the margins. When one engine stalled due to injury, the whole machine collapsed. They had not built a system that valued efficiency and defense over raw point totals.
+
+### The Connector Logic
+Compare the Nets to the 2021 Milwaukee Bucks, the very same that eliminated them. Before they traded for Jrue Holiday, the Bucks were a regular season powerhouse that struggled in the playoffs. They replaced Eric Bledsoe with Holiday. While Holiday's raw scoring numbers were not always massive, his impact was astronomical.
+
+In the 2021 NBA Finals, Jrue Holiday had games where he shot 4 for 20. In the old days, fans would have called for his head. But the analytics told a different story. Even when his shot was not falling, his defensive presence was so suffocating that he was a plus 15 on the floor. He won possession after possession on the margins. He produced screen assists and forced deflections. He stayed attached to the opponent's best player like glue.
+
+The Bucks won that championship because they realized that surrounding a superstar like Giannis with hyper-efficient connectors is more valuable than adding a second high-volume, low-defense scorer. They traded for a guy who could score 27 in a Game 5 but was just as happy to score 12 if it meant getting the win.
+
+We used to live in a world of what ifs and eye tests. We used to argue that a guy was good just because he looked like a star. Analytics has killed that era. We now know that a player can average 20 points and 10 rebounds while being the reason their team loses. If those 20 points come on 45 percent true shooting and those 10 rebounds are uncontested, that player is a ghost in the machine.
+
+The box score is a skeleton, but analytics is the flesh and blood of the game. It tells us that basketball is not about who can put the ball in the hoop the most. It is about who can maximize the value of every single second they spend on the hardwood.
+    `
   },
   {
+    "id": "setting-up-2026",
     "date": "Jan 6, 2026",
     "title": "The First Post: Setting Up the Site",
     "readTime": "2 min read",
-    "description": "A quick look at the process of building this minimalist, weather-reactive portfolio using React and Tailwind."
-  },
-
+    "description": "A quick look at the process of building this minimalist, weather-reactive portfolio using React and Tailwind.",
+    "content": "Welcome to my new personal site. This project was born out of a desire for a clean, typography-focused space to share thoughts on sports, data, and media. Built with React and Tailwind CSS, it features a dynamic weather system and three distinct themes (Light, Dark, and Sunset). I'll be using this space to document my projects and share my findings in the world of sports analytics."
+  }
 ];
 
 // --- Components ---
@@ -235,8 +259,8 @@ const Navbar = ({ activePage, setActivePage, theme }) => {
   );
 };
 
-const WritingItem = ({ date, title, readTime, description, theme }) => (
-  <div className="group mb-10 cursor-pointer">
+const WritingItem = ({ date, title, readTime, description, theme, onClick }) => (
+  <div className="group mb-10 cursor-pointer" onClick={onClick}>
     <div className="flex items-baseline gap-x-4 mb-1">
       <span className={`text-[10px] uppercase tracking-widest font-medium font-mono ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>
         {date}
@@ -256,7 +280,7 @@ const WritingItem = ({ date, title, readTime, description, theme }) => (
 
 // --- Pages ---
 
-const Home = ({ setActivePage, theme, posts }) => {
+const Home = ({ onSelectPost, theme, posts }) => {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 relative z-10">
       <section className="mb-20">
@@ -276,7 +300,7 @@ const Home = ({ setActivePage, theme, posts }) => {
         <div className={`flex items-center justify-between mb-10 border-b pb-4 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>
           <h2 className="text-xs uppercase tracking-[0.2em] font-bold text-slate-400">writing</h2>
           <button 
-            onClick={() => setActivePage('blog')}
+            onClick={() => onSelectPost(null, 'blog')}
             className={`text-xs transition-colors flex items-center gap-1 ${theme === 'sunset' ? 'text-[#8c746f] hover:text-orange-600' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
           >
             view all <ArrowRight className="w-3 h-3" />
@@ -284,7 +308,14 @@ const Home = ({ setActivePage, theme, posts }) => {
         </div>
         <div>
           {posts && posts.length > 0 ? (
-            posts.slice(0, 3).map((post, idx) => <WritingItem key={idx} {...post} theme={theme} />)
+            posts.slice(0, 3).map((post, idx) => (
+              <WritingItem 
+                key={idx} 
+                {...post} 
+                theme={theme} 
+                onClick={() => onSelectPost(post)}
+              />
+            ))
           ) : (
             <p className="text-sm text-slate-400 italic">No posts yet. Check back soon.</p>
           )}
@@ -344,15 +375,49 @@ const About = ({ theme }) => (
   </div>
 );
 
-const Blog = ({ theme, posts }) => (
+const Blog = ({ theme, posts, onSelectPost }) => (
   <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10">
     <h2 className={`text-2xl font-semibold mb-12 tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>all writing</h2>
     <div className="space-y-12">
       {posts && posts.length > 0 ? (
-        posts.map((post, idx) => <WritingItem key={idx} {...post} theme={theme} />)
+        posts.map((post, idx) => (
+          <WritingItem 
+            key={idx} 
+            {...post} 
+            theme={theme} 
+            onClick={() => onSelectPost(post)}
+          />
+        ))
       ) : (
         <p className="text-slate-500 dark:text-slate-400 italic">There are no archived posts yet.</p>
       )}
+    </div>
+  </div>
+);
+
+const Article = ({ theme, post, onBack }) => (
+  <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 max-w-2xl">
+    <button 
+      onClick={onBack}
+      className={`flex items-center gap-2 text-xs uppercase tracking-widest font-mono mb-12 hover:gap-3 transition-all ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
+    >
+      <ArrowLeft size={14} /> back
+    </button>
+    <div className="mb-12">
+      <div className="flex items-baseline gap-x-4 mb-2">
+        <span className={`text-xs uppercase tracking-widest font-medium font-mono ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>
+          {post.date}
+        </span>
+        <span className={`text-xs uppercase tracking-widest font-mono ${theme === 'sunset' ? 'text-pink-300' : 'text-slate-300 dark:text-slate-600'}`}>
+          {post.readTime}
+        </span>
+      </div>
+      <h1 className={`text-3xl md:text-4xl font-semibold tracking-tighter mb-6 ${theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}`}>
+        {post.title}
+      </h1>
+    </div>
+    <div className={`prose prose-slate dark:prose-invert max-w-none leading-relaxed whitespace-pre-wrap ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-300'}`}>
+      {post.content}
     </div>
   </div>
 );
@@ -397,6 +462,7 @@ export default function App() {
   const [theme, setTheme] = useState('light'); 
   const [weatherType, setWeatherType] = useState('none');
   const [blogPosts, setBlogPosts] = useState(INITIAL_POSTS);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -434,13 +500,20 @@ export default function App() {
     }
   };
 
+  const handleSelectPost = (post, page = 'article') => {
+    setSelectedPost(post);
+    setActivePage(page);
+    window.scrollTo(0, 0);
+  };
+
   const renderPage = () => {
     switch(activePage) {
       case 'about': return <About theme={theme} />;
-      case 'blog': return <Blog theme={theme} posts={blogPosts} />;
+      case 'blog': return <Blog theme={theme} posts={blogPosts} onSelectPost={handleSelectPost} />;
+      case 'article': return <Article theme={theme} post={selectedPost} onBack={() => setActivePage('home')} />;
       case 'now': return <Now theme={theme} />;
       case 'wander-placeholder': return <WanderPlaceholder theme={theme} onBack={() => setActivePage('home')} />;
-      default: return <Home setActivePage={setActivePage} theme={theme} posts={blogPosts} />;
+      default: return <Home onSelectPost={handleSelectPost} theme={theme} posts={blogPosts} />;
     }
   };
 
