@@ -46,6 +46,7 @@ const RatingStars = ({ rating, theme }) => {
 
 const WeatherEffect = ({ theme, type }) => {
   const canvasRef = useRef(null);
+  
   useEffect(() => {
     if (type === 'none') return;
     const canvas = canvasRef.current;
@@ -56,10 +57,12 @@ const WeatherEffect = ({ theme, type }) => {
       canvas.width = window.innerWidth; 
       canvas.height = window.innerHeight; 
     };
+    
     window.addEventListener('resize', resize);
     resize();
 
     const particles = [];
+    // Increased particle count for better visibility
     const count = 160;
 
     const createParticle = () => {
@@ -69,16 +72,17 @@ const WeatherEffect = ({ theme, type }) => {
           y: Math.random() * canvas.height,
           length: Math.random() * 22 + 12,
           speed: Math.random() * 10 + 8,
-          opacity: Math.random() * 0.4 + 0.2
+          opacity: Math.random() * 0.4 + 0.2, // Higher base opacity
+          hue: Math.random() * 360 // Random hue for rainbow effect
         };
       } else if (type === 'snow') {
         return {
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: Math.random() * 3.5 + 1.5,
+          radius: Math.random() * 3.5 + 1.5, // Slightly larger flakes
           speed: Math.random() * 1.2 + 0.6,
           wind: Math.random() * 1.2 - 0.6,
-          opacity: Math.random() * 0.6 + 0.4
+          opacity: Math.random() * 0.6 + 0.4 // Higher base opacity
         };
       }
       return null;
@@ -91,19 +95,25 @@ const WeatherEffect = ({ theme, type }) => {
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let color = theme === 'dark' ? '255, 255, 255' : theme === 'sunset' ? '139, 92, 246' : '0, 0, 0';
       
       particles.forEach(p => {
         ctx.beginPath();
         if (type === 'rain') {
-          ctx.strokeStyle = `rgba(${color}, ${p.opacity})`;
-          ctx.lineWidth = 1.5;
+          if (theme === 'sunset') {
+            // Very light rainbow hue for sunset rain
+            ctx.strokeStyle = `hsla(${p.hue}, 70%, 75%, ${p.opacity})`;
+          } else {
+            const color = theme === 'dark' ? '255, 255, 255' : '0, 0, 0';
+            ctx.strokeStyle = `rgba(${color}, ${p.opacity})`;
+          }
+          ctx.lineWidth = 1.5; // Slightly thicker lines
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(p.x, p.y + p.length);
           ctx.stroke();
           p.y += p.speed;
           if (p.y > canvas.height) p.y = -p.length;
         } else if (type === 'snow') {
+          const color = theme === 'dark' ? '255, 255, 255' : theme === 'sunset' ? '139, 92, 246' : '0, 0, 0';
           ctx.fillStyle = `rgba(${color}, ${p.opacity})`;
           ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
           ctx.fill();
@@ -125,6 +135,7 @@ const WeatherEffect = ({ theme, type }) => {
   }, [theme, type]);
 
   if (type === 'none') return null;
+  // Increased global opacity from 40 to 65 for better overall presence
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-65" />;
 };
 
@@ -389,19 +400,24 @@ export default function App() {
     // Apply specific top and bottom colors to kill white overscroll gaps
     if (theme === 'dark') {
       root.classList.add('dark');
-      root.style.backgroundColor = '#0a0a0a'; // Top overscroll
-      body.style.backgroundColor = '#0a0a0a'; // Bottom overscroll
+      root.style.background = '#0a0a0a'; 
+      body.style.background = '#0a0a0a';
       metaThemeColor.setAttribute('content', '#0a0a0a');
+      root.style.backgroundAttachment = 'scroll';
     } else if (theme === 'sunset') {
       root.classList.remove('dark');
-      root.style.backgroundColor = '#fffcf0'; // Top overscroll (matches start of gradient)
-      body.style.backgroundColor = '#fce4ec'; // Bottom overscroll (matches end of gradient)
+      // Fix: Apply the gradient to the root/body with fixed attachment
+      // This ensures the gradient is visible in overscroll areas
+      root.style.background = 'linear-gradient(to bottom, #fffcf0, #fdf2f0, #fce4ec)';
+      root.style.backgroundAttachment = 'fixed';
+      body.style.background = 'transparent';
       metaThemeColor.setAttribute('content', '#fffcf0');
     } else {
       root.classList.remove('dark');
-      root.style.backgroundColor = '#fcfaf2'; // Top overscroll
-      body.style.backgroundColor = '#fcfaf2'; // Bottom overscroll
+      root.style.background = '#fcfaf2';
+      body.style.background = '#fcfaf2';
       metaThemeColor.setAttribute('content', '#fcfaf2');
+      root.style.backgroundAttachment = 'scroll';
     }
   }, [theme]);
 
