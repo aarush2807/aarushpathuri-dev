@@ -288,8 +288,8 @@ const Home = ({ onSelectPost, theme, posts }) => {
           exploring the intersection of data, competition, and storytelling.
         </p>
         <p className={`leading-relaxed max-w-xl ${theme === 'sunset' ? 'text-[#8c746f]' : 'text-slate-500 dark:text-slate-400'}`}>
-         A freshman CS student with an interest in sports analytics and finance. 
-          usually digging through a good movie or doomscrolling.
+         a student with an interest in sports analytics and finance. 
+          occasionally watching through a good movie and usually doomscrolling.
         </p>
       </section>
 
