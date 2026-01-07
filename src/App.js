@@ -45,90 +45,51 @@ const RatingStars = ({ rating, theme }) => {
 
 const WeatherEffect = ({ theme, type }) => {
   const canvasRef = useRef(null);
-  
   useEffect(() => {
     if (type === 'none') return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     let animationFrameId;
-
-    const resize = () => { 
-      canvas.width = window.innerWidth; 
-      canvas.height = window.innerHeight; 
-    };
-    
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
     window.addEventListener('resize', resize);
     resize();
-
     const particles = [];
-    // Increased particle count for better visibility
-    const count = 160;
-
-    const createParticle = () => {
-      if (type === 'rain') {
-        return {
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          length: Math.random() * 22 + 12,
-          speed: Math.random() * 10 + 8,
-          opacity: Math.random() * 0.4 + 0.2 // Higher base opacity
-        };
-      } else if (type === 'snow') {
-        return {
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: Math.random() * 3.5 + 1.5, // Slightly larger flakes
-          speed: Math.random() * 1.2 + 0.6,
-          wind: Math.random() * 1.2 - 0.6,
-          opacity: Math.random() * 0.6 + 0.4 // Higher base opacity
-        };
-      }
-      return null;
-    };
-
-    for (let i = 0; i < count; i++) {
-      const p = createParticle();
-      if (p) particles.push(p);
+    // Toned down quantity to 60 particles for a more subtle effect
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        length: Math.random() * 20 + 10,
+        speed: Math.random() * 10 + 7,
+        opacity: Math.random() * 0.3 + 0.1,
+        radius: Math.random() * 3 + 1,
+        wind: Math.random() * 1 - 0.5
+      });
     }
-
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let color = theme === 'dark' ? '255, 255, 255' : theme === 'sunset' ? '139, 92, 246' : '0, 0, 0';
-      
       particles.forEach(p => {
         ctx.beginPath();
         if (type === 'rain') {
           ctx.strokeStyle = `rgba(${color}, ${p.opacity})`;
-          ctx.lineWidth = 1.5; // Slightly thicker lines
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p.x, p.y + p.length);
-          ctx.stroke();
-          p.y += p.speed;
-          if (p.y > canvas.height) p.y = -p.length;
+          ctx.lineWidth = 1; ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y + p.length); ctx.stroke();
+          p.y += p.speed; if (p.y > canvas.height) p.y = -p.length;
         } else if (type === 'snow') {
           ctx.fillStyle = `rgba(${color}, ${p.opacity})`;
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fill();
-          p.y += p.speed;
-          p.x += p.wind + Math.sin(p.y / 50) * 0.5;
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
+          p.y += p.speed; p.x += p.wind + Math.sin(p.y / 50) * 0.5;
           if (p.y > canvas.height) p.y = -p.radius;
-          if (p.x > canvas.width) p.x = 0;
-          if (p.x < 0) p.x = canvas.width;
+          if (p.x > canvas.width) p.x = 0; if (p.x < 0) p.x = canvas.width;
         }
       });
       animationFrameId = requestAnimationFrame(draw);
     };
-
     draw();
-    return () => { 
-      window.removeEventListener('resize', resize); 
-      cancelAnimationFrame(animationFrameId); 
-    };
+    return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(animationFrameId); };
   }, [theme, type]);
-
   if (type === 'none') return null;
-  // Increased global opacity from 40 to 65 for better overall presence
-  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-65" />;
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-40" />;
 };
 
 const WritingItem = ({ id, date, title, readTime, description, theme }) => (
@@ -272,7 +233,7 @@ const Article = ({ theme, posts }) => {
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tighter mb-4">{post.title}</h1>
       </div>
-      <div className="prose prose-slate dark:prose-invert max-w-none leading-relaxed whitespace-pre-wrap">{post.content}</div>
+      <div className={`prose prose-slate dark:prose-invert max-w-none leading-relaxed whitespace-pre-wrap ${theme === 'sunset' ? 'text-[#6d5a56]' : ''}`}>{post.content}</div>
     </div>
   );
 };
@@ -331,20 +292,8 @@ export default function App() {
   const location = useLocation();
 
   useEffect(() => {
-    const root = document.documentElement;
-    const body = document.body;
-    
-    // Manage document-level theme classes and background colors
-    if (theme === 'dark') {
-      root.classList.add('dark');
-      body.style.backgroundColor = '#0a0a0a';
-    } else if (theme === 'sunset') {
-      root.classList.remove('dark');
-      body.style.backgroundColor = '#fffcf0';
-    } else {
-      root.classList.remove('dark');
-      body.style.backgroundColor = '#fcfaf2';
-    }
+    if (theme === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   }, [theme]);
 
   useEffect(() => { window.scrollTo(0, 0); }, [location.pathname]);
