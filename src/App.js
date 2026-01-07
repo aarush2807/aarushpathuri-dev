@@ -35,14 +35,14 @@ But if you look at the win column, everything flips. In the 2023 season, Zach La
 
 This is the fundamental shift in how we perceive basketball. Analytics has taught us that a star who scores 20 but is a cone on defense is often less valuable than a role player who shuts down the other team's best scorer. A player who stands still while opponents blow past him is a liability regardless of his scoring average.
 
-### The Engine Problem
+
 The internet often debates who is the better hooper, but the better question is how does this player scale. The 2021 Brooklyn Nets are the ultimate cautionary tale of the engine problem. On paper, having Kevin Durant, James Harden, and Kyrie Irving was a cheat code. They had three of the greatest offensive engines in history.
 
 The problem is that a basketball game only has one ball and 100 possessions. When you have three players who all need a 30 percent usage rate to be effective, you reach a point of diminishing returns. Analytics showed that while their offensive rating was historic, their defensive infrastructure was non-existent. They were all engines and no grease.
 
 Because they lacked glue guys like Caruso, the team was fragile. These are players who are happy to have a 10 percent usage rate but provide 100 percent effort on the margins. When one engine stalled due to injury, the whole machine collapsed. They had not built a system that valued efficiency and defense over raw point totals.
 
-### The Connector Logic
+
 Compare the Nets to the 2021 Milwaukee Bucks, the very same that eliminated them. Before they traded for Jrue Holiday, the Bucks were a regular season powerhouse that struggled in the playoffs. They replaced Eric Bledsoe with Holiday. While Holiday's raw scoring numbers were not always massive, his impact was astronomical.
 
 In the 2021 NBA Finals, Jrue Holiday had games where he shot 4 for 20. In the old days, fans would have called for his head. But the analytics told a different story. Even when his shot was not falling, his defensive presence was so suffocating that he was a plus 15 on the floor. He won possession after possession on the margins. He produced screen assists and forced deflections. He stayed attached to the opponent's best player like glue.
