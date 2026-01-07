@@ -406,9 +406,10 @@ export default function App() {
       root.style.backgroundAttachment = 'scroll';
     } else if (theme === 'sunset') {
       root.classList.remove('dark');
-      // Fix: Apply the gradient to the root/body with fixed attachment
-      // This ensures the gradient is visible in overscroll areas
-      root.style.background = 'linear-gradient(to bottom, #fffcf0, #fdf2f0, #fce4ec)';
+      // Fix: Explicitly set background color to match top of gradient to fix white overscroll
+      root.style.backgroundColor = '#fffcf0';
+      // Use backgroundImage for the gradient
+      root.style.backgroundImage = 'linear-gradient(to bottom, #fffcf0, #fdf2f0, #fce4ec)';
       root.style.backgroundAttachment = 'fixed';
       body.style.background = 'transparent';
       metaThemeColor.setAttribute('content', '#fffcf0');
