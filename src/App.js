@@ -32,7 +32,7 @@ import films from './films.json';
 // --- Custom Markdown Renderer ---
 
 const MarkdownRenderer = ({ content, theme }) => {
-  // Regex to split content by code blocks
+  // 1. Split by code blocks first
   const parts = content.split(/(```[\s\S]*?```)/g);
 
   return (
@@ -58,18 +58,18 @@ const MarkdownRenderer = ({ content, theme }) => {
                 theme === 'sunset' ? 'bg-[#fff8f0] border border-orange-100 text-[#5c4a45]' : 
                 'bg-slate-50 text-slate-800 border border-slate-200'
               }`}>
-                <pre style={{ margin: 0 }}>
-                  {code}
-                </pre>
+                <pre style={{ margin: 0 }}>{code}</pre>
               </div>
             </div>
           );
         } else {
-          // Handle Regular Text (Headers, Bold, Paragraphs)
-          return part.split('\n\n').map((block, i) => {
+          // 2. Split non-code parts into blocks by double newlines
+          const blocks = part.split(/\n\n/);
+          
+          return blocks.map((block, i) => {
             if (!block.trim()) return null;
 
-            // Headers (###)
+            // Handle actual Markdown Headers (###)
             if (block.startsWith('### ')) {
               return (
                 <h3 key={`${index}-${i}`} className={`text-xl font-semibold mt-8 mb-4 tracking-tight ${
@@ -80,32 +80,34 @@ const MarkdownRenderer = ({ content, theme }) => {
               );
             }
 
-            // Bold text parsing (**text**)
-            const parseBold = (text) => {
+            // Parse bold (**text**) and inline code (`text`)
+            const parseInline = (text) => {
+              // Regex handles bold first, then we map and handle backticks
               const boldParts = text.split(/(\*\*.*?\*\*)/g);
               return boldParts.map((segment, j) => {
                 if (segment.startsWith('**') && segment.endsWith('**')) {
                   return (
-                    <strong key={j} className={theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}>
+                    <strong key={j} className={`font-bold ${theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}`}>
                       {segment.slice(2, -2)}
                     </strong>
                   );
                 }
-                // Inline code parsing (`text`) within non-bold segments
+                
+                // Handle inline backticks within the non-bold segments
                 const codeParts = segment.split(/(`.*?`)/g);
-                return codeParts.map((subSegment, k) => {
-                    if (subSegment.startsWith('`') && subSegment.endsWith('`')) {
-                        return (
-                          <code key={`${j}-${k}`} className={`px-1.5 py-0.5 rounded text-sm font-mono ${
-                            theme === 'dark' ? 'bg-slate-800 text-blue-300' : 
-                            theme === 'sunset' ? 'bg-orange-100 text-[#4a3733]' : 
-                            'bg-slate-100 text-slate-700'
-                          }`}>
-                            {subSegment.slice(1, -1)}
-                          </code>
-                        );
-                    }
-                    return subSegment;
+                return codeParts.map((sub, k) => {
+                  if (sub.startsWith('`') && sub.endsWith('`')) {
+                    return (
+                      <code key={k} className={`px-1.5 py-0.5 rounded text-sm font-mono ${
+                        theme === 'dark' ? 'bg-slate-800 text-blue-300' : 
+                        theme === 'sunset' ? 'bg-orange-100 text-[#4a3733]' : 
+                        'bg-slate-100 text-slate-700'
+                      }`}>
+                        {sub.slice(1, -1)}
+                      </code>
+                    );
+                  }
+                  return sub;
                 });
               });
             };
@@ -114,7 +116,7 @@ const MarkdownRenderer = ({ content, theme }) => {
               <p key={`${index}-${i}`} className={`leading-relaxed mb-4 ${
                 theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-300'
               }`}>
-                {parseBold(block)}
+                {parseInline(block)}
               </p>
             );
           });
@@ -220,11 +222,7 @@ const WeatherEffect = ({ theme, type }) => {
       animationFrameId = requestAnimationFrame(draw);
     };
 
-    const handleAnimation = () => {
-      draw();
-    };
-
-    handleAnimation();
+    draw();
     return () => { 
       window.removeEventListener('resize', resize); 
       cancelAnimationFrame(animationFrameId); 
@@ -422,14 +420,14 @@ const FilmLog = ({ theme }) => (
 const About = ({ theme }) => (
   <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-2xl relative z-10">
     <h2 className="text-2xl font-semibold mb-6">about</h2>
-    <p className="leading-relaxed text-slate-600 dark:text-slate-400">I’m Aarush. I find myself at the crossroads of competition and calculation.</p>
+    <p className="leading-relaxed text-slate-600 dark:text-slate-400">I’m Aarush Pathuri, a Freshman Computer Science & Economics student at Iowa State University. I’m passionate about software development, especially in Python, and have built projects like "Bookster," a community textbook exchange for Iowa State students. I also serve as the Vice President for the Iowa State University Algorithmic Club, merging my interests in coding and economic analysis. When I’m not coding or analyzing market trends, I’m likely on the tennis court or working as a certified US Chess Club Tournament Director.</p>
   </div>
 );
 
 const Now = ({ theme }) => (
   <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-2xl relative z-10">
     <h2 className="text-2xl font-semibold mb-6">what i'm doing now</h2>
-    <p className="text-slate-600 dark:text-slate-400">Developing custom dashboards and catching up on movies.</p>
+    <p className="text-slate-600 dark:text-slate-400">Right now, I'm focused on my roles at Iowa State, leading the Algorithmic Club and refining my software projects. I'm also preparing for upcoming chess tournaments and staying active with tennis.</p>
   </div>
 );
 
