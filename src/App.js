@@ -468,8 +468,8 @@ export default function App() {
         <footer className={`mt-20 pt-8 border-t flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px] uppercase tracking-widest font-mono text-slate-400">
             <Link to="/colophon" className="hover:text-slate-900 dark:hover:text-white transition-colors">colophon</Link>
-            <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">changelog</a>
-            <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">rss</a>
+            <span className="cursor-not-allowed opacity-50">changelog</span>
+            <span className="cursor-not-allowed opacity-50">rss</span>
           </div>
           <div className="flex items-center gap-4 text-[11px] uppercase tracking-widest font-mono text-slate-400">
             <span className="flex items-center gap-1"><MapPin size={10} /> bloomington, 2026</span>
