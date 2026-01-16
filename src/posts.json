@@ -1,7 +1,4 @@
 [
-
-You said:
-[
   {
     "id": "sports-analytics-intro-2026",
     "date": "Jan 15, 2026",
@@ -36,4 +33,5 @@ You said:
     "content": "Welcome to my new personal site. This project was born out of a desire for a clean, typography-focused space to share thoughts on sports, data, and media. Built with React and Tailwind CSS, it features a dynamic weather system and three distinct themes (Light, Dark, and Sunset). I'll be using this space to document my projects and share my findings in the world of sports analytics."
   }
 ]
+
 
