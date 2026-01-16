@@ -26,6 +26,10 @@ import {
   ExternalLink
 } from 'lucide-react';
 
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
 import posts from './posts.json';
 import films from './films.json';
 
@@ -62,7 +66,6 @@ const WeatherEffect = ({ theme, type }) => {
     resize();
 
     const particles = [];
-    // Increased particle count for better visibility
     const count = 160;
 
     const createParticle = () => {
@@ -72,17 +75,17 @@ const WeatherEffect = ({ theme, type }) => {
           y: Math.random() * canvas.height,
           length: Math.random() * 22 + 12,
           speed: Math.random() * 10 + 8,
-          opacity: Math.random() * 0.4 + 0.2, // Higher base opacity
-          hue: Math.random() * 360 // Random hue for rainbow effect
+          opacity: Math.random() * 0.4 + 0.2,
+          hue: Math.random() * 360
         };
       } else if (type === 'snow') {
         return {
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: Math.random() * 3.5 + 1.5, // Slightly larger flakes
+          radius: Math.random() * 3.5 + 1.5,
           speed: Math.random() * 1.2 + 0.6,
           wind: Math.random() * 1.2 - 0.6,
-          opacity: Math.random() * 0.6 + 0.4 // Higher base opacity
+          opacity: Math.random() * 0.6 + 0.4
         };
       }
       return null;
@@ -100,13 +103,12 @@ const WeatherEffect = ({ theme, type }) => {
         ctx.beginPath();
         if (type === 'rain') {
           if (theme === 'sunset') {
-            // Very light rainbow hue for sunset rain
             ctx.strokeStyle = `hsla(${p.hue}, 70%, 75%, ${p.opacity})`;
           } else {
             const color = theme === 'dark' ? '255, 255, 255' : '0, 0, 0';
             ctx.strokeStyle = `rgba(${color}, ${p.opacity})`;
           }
-          ctx.lineWidth = 1.5; // Slightly thicker lines
+          ctx.lineWidth = 1.5;
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(p.x, p.y + p.length);
           ctx.stroke();
@@ -135,7 +137,6 @@ const WeatherEffect = ({ theme, type }) => {
   }, [theme, type]);
 
   if (type === 'none') return null;
-  // Increased global opacity from 40 to 65 for better overall presence
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-65" />;
 };
 
@@ -232,54 +233,17 @@ const Navbar = ({ theme }) => {
 const Colophon = ({ theme }) => (
   <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 relative z-10 max-w-2xl">
     <h2 className={`text-2xl font-semibold mb-6 tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>colophon</h2>
-
     <div className={`space-y-8 leading-relaxed ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-400'}`}>
       <section>
         <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>tech stack</h3>
-        <p className="text-sm">
-          This project is built using <strong>React</strong> for the user interface and <strong>Tailwind CSS</strong> for styling. I chose React for its component-based architecture, which allows for clean state management across the different themes and weather effects.
-        </p>
+        <p className="text-sm">Built using React and Tailwind CSS for minimalist, clean design.</p>
       </section>
-
       <section>
         <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>deployment</h3>
-        <p className="text-sm">
-          The site is hosted on <strong>Vercel</strong>. It is continuously deployed from a GitHub repository, ensuring that every push to the main branch is instantly live. This setup provides a fast, edge-cached experience worldwide.
-        </p>
-        <a 
-          href="https://github.com/aarush2807/aarushpathuri-dev/tree/main" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline group"
-        >
+        <p className="text-sm">Hosted on Vercel with continuous deployment from GitHub.</p>
+        <a href="https://github.com/aarush2807/aarushpathuri-dev" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline">
           <Github size={14} /> View on GitHub <ExternalLink size={10} className="opacity-50" />
         </a>
-      </section>
-
-      <section>
-        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>privacy</h3>
-        <p className="text-sm italic">
-          No tracking. No cookies. No analytics. 
-        </p>
-        <p className="text-sm mt-2">
-          This website is a strictly static experience. I don't collect your data, I don't know who you are, and I prefer it that way. The "no tracking" badge in the corner isn't just for show—it's a fundamental principle of how I build for the web.
-        </p>
-      </section>
-
-      <section>
-        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>features</h3>
-        <p className="text-sm">
-          <strong>Themes:</strong> The site features three modes—Light, Dark, and Sunset—designed to adapt to different environments and moods.
-          <br /><br />
-          <strong>Weather:</strong> The rain and snow effects are rendered on a custom HTML5 Canvas element. It's a lightweight particle system that runs in the background without affecting performance.
-        </p>
-      </section>
-
-      <section>
-        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>future goals</h3>
-        <p className="text-sm">
-          I plan to expand the "Wander" section with interactive sports datasets and specialized dashboards for NBA and NFL analysis. I also intend to integrate a more robust film archive as my log grows.
-        </p>
       </section>
     </div>
   </div>
@@ -290,7 +254,6 @@ const Home = ({ theme, posts }) => (
     <section className="mb-12">
       <h1 className={`text-4xl md:text-5xl font-semibold tracking-tighter mb-4 ${theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}`}>aarush pathuri</h1>
       <p className={`text-lg leading-relaxed max-w-2xl mb-3 italic font-serif ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-300'}`}>exploring the intersection of data, competition, and storytelling.</p>
-      <p className={`leading-relaxed max-w-xl ${theme === 'sunset' ? 'text-[#8c746f]' : 'text-slate-500 dark:text-slate-400'}`}>a student with an interest in sports analytics and finance. occasionally watching through a good movie.</p>
     </section>
     <section className="mb-12">
       <div className={`flex items-center justify-between mb-8 border-b pb-2 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>
@@ -328,7 +291,31 @@ const Article = ({ theme, posts }) => {
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tighter mb-4">{post.title}</h1>
       </div>
-      <div className="prose prose-slate dark:prose-invert max-w-none leading-relaxed whitespace-pre-wrap">{post.content}</div>
+      <div className="prose prose-slate dark:prose-invert max-w-none leading-relaxed">
+        <ReactMarkdown
+          components={{
+            code({ node, inline, className, children, ...props }) {
+              const match = /language-(\w+)/.exec(className || '');
+              return !inline && match ? (
+                <SyntaxHighlighter
+                  style={oneDark}
+                  language={match[1]}
+                  PreTag="div"
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              ) : (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            }
+          }}
+        >
+          {post.content}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 };
@@ -362,7 +349,7 @@ const FilmLog = ({ theme }) => (
 const About = ({ theme }) => (
   <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-2xl relative z-10">
     <h2 className="text-2xl font-semibold mb-6">about</h2>
-    <p className="leading-relaxed text-slate-600 dark:text-slate-400">I’m Aarush. I find myself at the crossroads of competition and calculation. For me, sports aren't just a pastime: they're a puzzle.</p>
+    <p className="leading-relaxed text-slate-600 dark:text-slate-400">I’m Aarush. I find myself at the crossroads of competition and calculation.</p>
   </div>
 );
 
@@ -379,8 +366,6 @@ const WanderPlaceholder = ({ theme }) => (
   </div>
 );
 
-// --- Main App ---
-
 export default function App() {
   const [theme, setTheme] = useState('light'); 
   const [weatherType, setWeatherType] = useState('none');
@@ -389,28 +374,21 @@ export default function App() {
   useEffect(() => {
     const root = document.documentElement;
     const body = document.body;
-    
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (!metaThemeColor) {
       metaThemeColor = document.createElement('meta');
       metaThemeColor.setAttribute('name', 'theme-color');
       document.head.appendChild(metaThemeColor);
     }
-
-    // Apply specific top and bottom colors to kill white overscroll gaps
     if (theme === 'dark') {
       root.classList.add('dark');
       root.style.background = '#0a0a0a'; 
       body.style.background = '#0a0a0a';
       metaThemeColor.setAttribute('content', '#0a0a0a');
-      root.style.backgroundAttachment = 'scroll';
     } else if (theme === 'sunset') {
       root.classList.remove('dark');
-      // Fix: Explicitly set background color to match top of gradient to fix white overscroll
       root.style.backgroundColor = '#fffcf0';
-      // Use backgroundImage for the gradient
       root.style.backgroundImage = 'linear-gradient(to bottom, #fffcf0, #fdf2f0, #fce4ec)';
-      root.style.backgroundAttachment = 'fixed';
       body.style.background = 'transparent';
       metaThemeColor.setAttribute('content', '#fffcf0');
     } else {
@@ -418,7 +396,6 @@ export default function App() {
       root.style.background = '#fcfaf2';
       body.style.background = '#fcfaf2';
       metaThemeColor.setAttribute('content', '#fcfaf2');
-      root.style.backgroundAttachment = 'scroll';
     }
   }, [theme]);
 
@@ -451,7 +428,6 @@ export default function App() {
             <button onClick={cycleTheme} className="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 text-slate-400">{theme === 'light' ? <Sun size={18} /> : theme === 'sunset' ? <Sunrise size={18} /> : <Moon size={18} />}</button>
           </div>
         </header>
-
         <main className="min-h-[50vh]">
           <Routes>
             <Route path="/" element={<Home theme={theme} posts={posts} />} />
@@ -464,12 +440,11 @@ export default function App() {
             <Route path="/wander" element={<WanderPlaceholder theme={theme} />} />
           </Routes>
         </main>
-
         <footer className={`mt-20 pt-8 border-t flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px] uppercase tracking-widest font-mono text-slate-400">
             <Link to="/colophon" className="hover:text-slate-900 dark:hover:text-white transition-colors">colophon</Link>
-            <span className="cursor-not-allowed opacity-50">changelog</span>
-            <span className="cursor-not-allowed opacity-50">rss</span>
+            <span className="opacity-50">changelog</span>
+            <span className="opacity-50">rss</span>
           </div>
           <div className="flex items-center gap-4 text-[11px] uppercase tracking-widest font-mono text-slate-400">
             <span className="flex items-center gap-1"><MapPin size={10} /> bloomington, 2026</span>
