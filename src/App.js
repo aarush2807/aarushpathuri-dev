@@ -24,8 +24,6 @@ import {
   Star,
   StarHalf,
   ExternalLink,
-  Copy,
-  Check
 } from 'lucide-react';
 
 import posts from './posts.json';
