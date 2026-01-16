@@ -82,20 +82,28 @@ const MarkdownRenderer = ({ content, theme }) => {
 
             // Bold text parsing (**text**)
             const parseBold = (text) => {
-              const parts = text.split(/(\*\*.*?\*\*)/g);
-              return parts.map((segment, j) => {
+              const boldParts = text.split(/(\*\*.*?\*\*)/g);
+              return boldParts.map((segment, j) => {
                 if (segment.startsWith('**') && segment.endsWith('**')) {
-                  return <strong key={j} className={theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}>{segment.slice(2, -2)}</strong>;
+                  return (
+                    <strong key={j} className={theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}>
+                      {segment.slice(2, -2)}
+                    </strong>
+                  );
                 }
                 // Inline code parsing (`text`) within non-bold segments
                 const codeParts = segment.split(/(`.*?`)/g);
                 return codeParts.map((subSegment, k) => {
                     if (subSegment.startsWith('`') && subSegment.endsWith('`')) {
-                        return <code key={`${j}-${k}`} className={`px-1.5 py-0.5 rounded text-sm font-mono ${
+                        return (
+                          <code key={`${j}-${k}`} className={`px-1.5 py-0.5 rounded text-sm font-mono ${
                             theme === 'dark' ? 'bg-slate-800 text-blue-300' : 
                             theme === 'sunset' ? 'bg-orange-100 text-[#4a3733]' : 
                             'bg-slate-100 text-slate-700'
-                        }`}>{subSegment.slice(1, -1)}</code>;
+                          }`}>
+                            {subSegment.slice(1, -1)}
+                          </code>
+                        );
                     }
                     return subSegment;
                 });
@@ -212,7 +220,11 @@ const WeatherEffect = ({ theme, type }) => {
       animationFrameId = requestAnimationFrame(draw);
     };
 
-    draw();
+    const handleAnimation = () => {
+      draw();
+    };
+
+    handleAnimation();
     return () => { 
       window.removeEventListener('resize', resize); 
       cancelAnimationFrame(animationFrameId); 
