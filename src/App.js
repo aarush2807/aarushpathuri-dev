@@ -32,21 +32,19 @@ import films from './films.json';
 // --- Custom Markdown Renderer ---
 
 const MarkdownRenderer = ({ content, theme }) => {
-  // 1. Split by code blocks first
   const parts = content.split(/(```[\s\S]*?```)/g);
 
   return (
     <div className="space-y-6">
       {parts.map((part, index) => {
         if (part.startsWith('```')) {
-          // Handle Code Block
           const match = part.match(/```(\w+)?\n([\s\S]*?)```/);
           const language = match ? match[1] : '';
           const code = match ? match[2] : part.slice(3, -3);
 
           return (
-            <div key={index} className="relative group rounded-lg overflow-hidden my-6 text-sm">
-              <div className={`flex items-center justify-between px-4 py-2 text-xs font-mono uppercase tracking-wider ${
+            <div key={index} className="relative rounded-lg overflow-hidden my-6 text-sm">
+              <div className={`px-4 py-2 text-xs font-mono uppercase tracking-wider ${
                 theme === 'dark' ? 'bg-slate-800 text-slate-400' : 
                 theme === 'sunset' ? 'bg-[#eaddd7] text-[#6d5a56]' : 
                 'bg-slate-200 text-slate-500'
@@ -58,18 +56,15 @@ const MarkdownRenderer = ({ content, theme }) => {
                 theme === 'sunset' ? 'bg-[#fff8f0] border border-orange-100 text-[#5c4a45]' : 
                 'bg-slate-50 text-slate-800 border border-slate-200'
               }`}>
-                <pre style={{ margin: 0 }}>{code}</pre>
+                <pre className="m-0 whitespace-pre">{code}</pre>
               </div>
             </div>
           );
         } else {
-          // 2. Split non-code parts into blocks by double newlines
           const blocks = part.split(/\n\n/);
-          
           return blocks.map((block, i) => {
             if (!block.trim()) return null;
 
-            // Handle actual Markdown Headers (###)
             if (block.startsWith('### ')) {
               return (
                 <h3 key={`${index}-${i}`} className={`text-xl font-semibold mt-8 mb-4 tracking-tight ${
@@ -80,11 +75,11 @@ const MarkdownRenderer = ({ content, theme }) => {
               );
             }
 
-            // Parse bold (**text**) and inline code (`text`)
             const parseInline = (text) => {
-              // Regex handles bold first, then we map and handle backticks
-              const boldParts = text.split(/(\*\*.*?\*\*)/g);
-              return boldParts.map((segment, j) => {
+              const regex = /(\*\*.*?\*\*|`.*?`)/g;
+              const inlineParts = text.split(regex);
+
+              return inlineParts.map((segment, j) => {
                 if (segment.startsWith('**') && segment.endsWith('**')) {
                   return (
                     <strong key={j} className={`font-bold ${theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}`}>
@@ -92,29 +87,24 @@ const MarkdownRenderer = ({ content, theme }) => {
                     </strong>
                   );
                 }
-                
-                // Handle inline backticks within the non-bold segments
-                const codeParts = segment.split(/(`.*?`)/g);
-                return codeParts.map((sub, k) => {
-                  if (sub.startsWith('`') && sub.endsWith('`')) {
-                    return (
-                      <code key={k} className={`px-1.5 py-0.5 rounded text-sm font-mono ${
-                        theme === 'dark' ? 'bg-slate-800 text-blue-300' : 
-                        theme === 'sunset' ? 'bg-orange-100 text-[#4a3733]' : 
-                        'bg-slate-100 text-slate-700'
-                      }`}>
-                        {sub.slice(1, -1)}
-                      </code>
-                    );
-                  }
-                  return sub;
-                });
+                if (segment.startsWith('`') && segment.endsWith('`')) {
+                  return (
+                    <code key={j} className={`px-1.5 py-0.5 rounded text-sm font-mono ${
+                      theme === 'dark' ? 'bg-slate-800 text-blue-300' : 
+                      theme === 'sunset' ? 'bg-orange-100 text-[#4a3733]' : 
+                      'bg-slate-100 text-slate-700'
+                    }`}>
+                      {segment.slice(1, -1)}
+                    </code>
+                  );
+                }
+                return segment;
               });
             };
 
             return (
-              <p key={`${index}-${i}`} className={`leading-relaxed mb-4 ${
-                theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-300'
+              <p key={`${index}-${i}`} className={`text-base leading-relaxed mb-4 font-normal ${
+                theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-400'
               }`}>
                 {parseInline(block)}
               </p>
@@ -143,176 +133,92 @@ const RatingStars = ({ rating, theme }) => {
 
 const WeatherEffect = ({ theme, type }) => {
   const canvasRef = useRef(null);
-  
   useEffect(() => {
     if (type === 'none') return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     let animationFrameId;
-
-    const resize = () => { 
-      canvas.width = window.innerWidth; 
-      canvas.height = window.innerHeight; 
-    };
-    
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
     window.addEventListener('resize', resize);
     resize();
-
     const particles = [];
-    const count = 160;
-
-    const createParticle = () => {
-      if (type === 'rain') {
-        return {
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          length: Math.random() * 22 + 12,
-          speed: Math.random() * 10 + 8,
-          opacity: Math.random() * 0.4 + 0.2,
-          hue: Math.random() * 360
-        };
-      } else if (type === 'snow') {
-        return {
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: Math.random() * 3.5 + 1.5,
-          speed: Math.random() * 1.2 + 0.6,
-          wind: Math.random() * 1.2 - 0.6,
-          opacity: Math.random() * 0.6 + 0.4
-        };
-      }
-      return null;
-    };
-
-    for (let i = 0; i < count; i++) {
-      const p = createParticle();
-      if (p) particles.push(p);
+    for (let i = 0; i < 160; i++) {
+      particles.push(type === 'rain' ? {
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        length: Math.random() * 22 + 12, speed: Math.random() * 10 + 8,
+        opacity: Math.random() * 0.4 + 0.2, hue: Math.random() * 360
+      } : {
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        radius: Math.random() * 3.5 + 1.5, speed: Math.random() * 1.2 + 0.6,
+        wind: Math.random() * 1.2 - 0.6, opacity: Math.random() * 0.6 + 0.4
+      });
     }
-
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
       particles.forEach(p => {
         ctx.beginPath();
         if (type === 'rain') {
-          if (theme === 'sunset') {
-            ctx.strokeStyle = `hsla(${p.hue}, 70%, 75%, ${p.opacity})`;
-          } else {
-            const color = theme === 'dark' ? '255, 255, 255' : '0, 0, 0';
-            ctx.strokeStyle = `rgba(${color}, ${p.opacity})`;
-          }
-          ctx.lineWidth = 1.5;
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p.x, p.y + p.length);
-          ctx.stroke();
-          p.y += p.speed;
-          if (p.y > canvas.height) p.y = -p.length;
-        } else if (type === 'snow') {
-          const color = theme === 'dark' ? '255, 255, 255' : theme === 'sunset' ? '139, 92, 246' : '0, 0, 0';
-          ctx.fillStyle = `rgba(${color}, ${p.opacity})`;
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fill();
-          p.y += p.speed;
-          p.x += p.wind + Math.sin(p.y / 50) * 0.5;
+          ctx.strokeStyle = theme === 'sunset' ? `hsla(${p.hue}, 70%, 75%, ${p.opacity})` : `rgba(${theme === 'dark' ? '255,255,255' : '0,0,0'}, ${p.opacity})`;
+          ctx.lineWidth = 1.5; ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y + p.length); ctx.stroke();
+          p.y += p.speed; if (p.y > canvas.height) p.y = -p.length;
+        } else {
+          ctx.fillStyle = `rgba(${theme === 'dark' ? '255,255,255' : theme === 'sunset' ? '139,92,246' : '0,0,0'}, ${p.opacity})`;
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
+          p.y += p.speed; p.x += p.wind + Math.sin(p.y / 50) * 0.5;
           if (p.y > canvas.height) p.y = -p.radius;
-          if (p.x > canvas.width) p.x = 0;
-          if (p.x < 0) p.x = canvas.width;
         }
       });
       animationFrameId = requestAnimationFrame(draw);
     };
-
     draw();
-    return () => { 
-      window.removeEventListener('resize', resize); 
-      cancelAnimationFrame(animationFrameId); 
-    };
+    return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(animationFrameId); };
   }, [theme, type]);
-
-  if (type === 'none') return null;
-  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-65" />;
+  return type === 'none' ? null : <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-60" />;
 };
 
 const WritingItem = ({ id, date, title, readTime, description, theme }) => (
   <Link to={`/blog/${id}`} className="block group mb-10">
     <div className="flex items-baseline gap-x-4 mb-2">
-      <span className={`text-[10px] uppercase tracking-widest font-medium font-mono ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>
-        {date}
-      </span>
-      {readTime && (
-        <span className={`text-[10px] uppercase tracking-widest font-mono ${theme === 'sunset' ? 'text-pink-300' : 'text-slate-300 dark:text-slate-600'}`}>
-          {readTime}
-        </span>
-      )}
+      <span className={`text-[10px] uppercase tracking-widest font-mono font-medium ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>{date}</span>
+      {readTime && <span className={`text-[10px] uppercase tracking-widest font-mono ${theme === 'sunset' ? 'text-pink-300' : 'text-slate-300 dark:text-slate-600'}`}>{readTime}</span>}
     </div>
-    <h3 className={`text-lg font-medium transition-colors mb-2 ${theme === 'sunset' ? 'text-[#4a3733] group-hover:text-orange-600' : 'text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}>
-      {title}
-    </h3>
-    <p className={`text-sm leading-relaxed max-w-xl ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-500 dark:text-slate-400'}`}>
-      {description}
-    </p>
+    <h3 className={`text-lg font-medium transition-colors mb-2 ${theme === 'sunset' ? 'text-[#4a3733] group-hover:text-orange-600' : 'text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}>{title}</h3>
+    <p className={`text-sm leading-relaxed max-w-xl ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-500 dark:text-slate-400'}`}>{description}</p>
   </Link>
 );
 
 const Navbar = ({ theme }) => {
-  const [isWanderOpen, setIsWanderOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const location = useLocation();
-
   const wanderLinks = [
-    { label: "current projects", path: "/wander" },
-    { label: "film log", path: "/films" },
-    { label: "sports datasets", path: "/wander" },
-    { label: "tools i use", path: "/wander" },
-    { label: "favorite quotes", path: "/wander" },
-    { label: "reading list", path: "/wander" },
-    { label: "encrypted contact", path: "/wander" }
+    { label: "current projects", path: "/wander" }, { label: "film log", path: "/films" },
+    { label: "sports datasets", path: "/wander" }, { label: "tools i use", path: "/wander" },
+    { label: "favorite quotes", path: "/wander" }, { label: "reading list", path: "/wander" }
   ];
-
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsWanderOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const click = (e) => { if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false); };
+    document.addEventListener("mousedown", click); return () => document.removeEventListener("mousedown", click);
   }, []);
-
   const navItems = [
-    { id: 'home', label: 'aarush pathuri', path: '/', brand: true },
-    { id: 'about', label: 'about', path: '/about' },
-    { id: 'blog', label: 'blog', path: '/blog' },
-    { id: 'now', label: 'now', path: '/now' },
+    { label: 'aarush pathuri', path: '/', brand: true }, { label: 'about', path: '/about' },
+    { label: 'blog', path: '/blog' }, { label: 'now', path: '/now' },
   ];
-
   return (
     <nav className="flex items-center relative z-50">
-      <div className="flex flex-wrap items-center gap-x-5 md:gap-x-6 gap-y-2">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
         {navItems.map((item) => (
-          <Link
-            key={item.id}
-            to={item.path}
-            className={`text-sm tracking-tight transition-colors duration-200 font-medium underline-offset-4 ${
-              item.brand 
-                ? theme === 'dark' ? 'text-white' : theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900'
-                : location.pathname === item.path 
-                  ? (theme === 'dark' ? 'text-white underline' : theme === 'sunset' ? 'text-[#4a3733] underline' : 'text-slate-900 underline')
-                  : theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
+          <Link key={item.path} to={item.path} className={`text-sm tracking-tight transition-colors font-medium ${item.brand ? (theme === 'dark' ? 'text-white' : theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900') : (location.pathname === item.path ? 'underline' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white')}`}>
             {item.label}
           </Link>
         ))}
         <div className="relative" ref={dropdownRef}>
-          <button onClick={() => setIsWanderOpen(!isWanderOpen)} className={`text-sm tracking-tight transition-colors duration-200 font-medium flex items-center gap-1 ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
-            wander <ChevronDown size={14} className={`transition-transform duration-200 ${isWanderOpen ? 'rotate-180' : ''}`} />
+          <button onClick={() => setIsOpen(!isOpen)} className="text-sm tracking-tight font-medium flex items-center gap-1 text-slate-500 hover:text-slate-900">
+            wander <ChevronDown size={14} className={isOpen ? 'rotate-180' : ''} />
           </button>
-          {isWanderOpen && (
-            <div className={`absolute left-0 mt-2 w-48 rounded-xl shadow-xl border p-2 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 ${theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : theme === 'sunset' ? 'bg-[#fffcf0]/90 border-orange-100' : 'bg-white/90 border-slate-200'}`}>
-              {wanderLinks.map((item, idx) => (
-                <Link key={idx} to={item.path} onClick={() => setIsWanderOpen(false)} className={`block px-3 py-2 text-xs rounded-lg transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:bg-orange-50 hover:text-[#4a3733]' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white'}`}>
-                  {item.label}
-                </Link>
-              ))}
+          {isOpen && (
+            <div className={`absolute left-0 mt-2 w-48 rounded-xl shadow-xl border p-2 backdrop-blur-md ${theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : 'bg-white/90 border-slate-200'}`}>
+              {wanderLinks.map((l) => <Link key={l.label} to={l.path} onClick={() => setIsOpen(false)} className="block px-3 py-2 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">{l.label}</Link>)}
             </div>
           )}
         </div>
@@ -321,205 +227,93 @@ const Navbar = ({ theme }) => {
   );
 };
 
-// --- Pages ---
-
-const Colophon = ({ theme }) => (
-  <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 relative z-10 max-w-2xl">
-    <h2 className={`text-2xl font-semibold mb-6 tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>colophon</h2>
-    <div className={`space-y-8 leading-relaxed ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-400'}`}>
-      <section>
-        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>tech stack</h3>
-        <p className="text-sm">Built using React and Tailwind CSS for minimalist, clean design.</p>
-      </section>
-      <section>
-        <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>deployment</h3>
-        <p className="text-sm">Hosted on Vercel with continuous deployment from GitHub.</p>
-        <a href="[https://github.com/aarush2807/aarushpathuri-dev](https://github.com/aarush2807/aarushpathuri-dev)" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline">
-          <Github size={14} /> View on GitHub <ExternalLink size={10} className="opacity-50" />
-        </a>
-      </section>
-    </div>
-  </div>
-);
-
 const Home = ({ theme, posts }) => (
-  <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 relative z-10">
+  <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 z-10 relative">
     <section className="mb-12">
       <h1 className={`text-4xl md:text-5xl font-semibold tracking-tighter mb-4 ${theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}`}>aarush pathuri</h1>
-      <p className={`text-lg leading-relaxed max-w-2xl mb-3 italic font-serif ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-300'}`}>exploring the intersection of data, competition, and storytelling.</p>
+      <p className={`text-lg leading-relaxed max-w-2xl italic font-serif ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-300'}`}>exploring the intersection of data, competition, and storytelling.</p>
     </section>
     <section className="mb-12">
-      <div className={`flex items-center justify-between mb-8 border-b pb-2 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>
+      <div className="flex items-center justify-between mb-8 border-b border-slate-200 dark:border-slate-800 pb-2">
         <h2 className="text-xs uppercase tracking-[0.2em] font-bold text-slate-400">writing</h2>
-        <Link to="/blog" className="text-xs text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1">view all <ArrowRight className="w-3 h-3" /></Link>
+        <Link to="/blog" className="text-xs text-slate-400 hover:text-slate-900 flex items-center gap-1">view all <ArrowRight size={12}/></Link>
       </div>
-      <div>{posts?.slice(0, 3).map((post, idx) => <WritingItem key={idx} {...post} theme={theme} />)}</div>
+      {posts?.slice(0, 3).map((p) => <WritingItem key={p.id} {...p} theme={theme} />)}
     </section>
-    <section className="mb-12">
-      <h2 className={`text-xs uppercase tracking-[0.2em] font-bold text-slate-400 mb-8 border-b pb-2 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>elsewhere</h2>
-      <div className="flex flex-wrap gap-6">
-        <a href="mailto:aarushvpathuri2807@gmail.com" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-orange-500' : 'text-slate-400 hover:text-blue-500'}`}><Mail className="w-4 h-4" /> email</a>
-        <a href="[https://github.com/aarush2807](https://github.com/aarush2807)" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><Github className="w-4 h-4" /> github</a>
-        <a href="[https://www.linkedin.com/in/aarush-pathuri-b943b0265/](https://www.linkedin.com/in/aarush-pathuri-b943b0265/)" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-700' : 'text-slate-400 hover:text-blue-700'}`}><Linkedin className="w-4 h-4" /> linkedin</a>
-      </div>
-    </section>
-  </div>
-);
-
-const Blog = ({ theme, posts }) => (
-  <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 relative z-10">
-    <h2 className="text-2xl font-semibold mb-10 tracking-tight">all writing</h2>
-    <div className="space-y-4">{posts?.map((post, idx) => <WritingItem key={idx} {...post} theme={theme} />)}</div>
   </div>
 );
 
 const Article = ({ theme, posts }) => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const post = posts.find(p => p.id === id);
   if (!post) return <div className="py-20 text-center">Post not found.</div>;
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 relative z-10 max-w-2xl">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-xs uppercase tracking-widest font-mono mb-8 hover:gap-3 transition-all text-slate-400"><ArrowLeft size={14} /> back</button>
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-semibold tracking-tighter mb-4">{post.title}</h1>
-      </div>
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <MarkdownRenderer content={post.content} theme={theme} />
-      </div>
+    <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-2xl z-10 relative">
+      <Link to="/blog" className="flex items-center gap-2 text-xs uppercase tracking-widest font-mono mb-8 text-slate-400"><ArrowLeft size={14} /> back</Link>
+      <h1 className="text-3xl md:text-4xl font-semibold tracking-tighter mb-8">{post.title}</h1>
+      <MarkdownRenderer content={post.content} theme={theme} />
     </div>
   );
 };
 
-const FilmLog = ({ theme }) => (
-  <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 relative z-10">
-    <div className="mb-12">
-      <h2 className={`text-2xl font-semibold mb-2 tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>film log</h2>
-      <p className={`text-sm font-serif italic ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-500'}`}>recent viewings and reflections.</p>
-    </div>
-    <div className="space-y-12">
-      {films.map((film) => (
-        <div key={film.id} className="flex flex-col md:flex-row gap-6 group">
-          <div className="w-full md:w-32 aspect-[2/3] overflow-hidden rounded-lg bg-slate-200 relative shrink-0">
-            <img src={film.image} alt={film.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" onError={(e) => { e.target.src = '[https://via.placeholder.com/200x300?text=No+Poster](https://via.placeholder.com/200x300?text=No+Poster)'; }} />
-          </div>
-          <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-x-3 mb-2">
-              <h3 className={`text-lg font-medium ${theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}`}>{film.title}</h3>
-              <span className="text-xs font-mono text-slate-400">{film.year}</span>
-              <RatingStars rating={film.rating} theme={theme} />
-            </div>
-            <p className={`text-sm leading-relaxed max-w-xl ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-400'}`}>{film.review}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
 const About = ({ theme }) => (
   <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-2xl relative z-10">
     <h2 className="text-2xl font-semibold mb-6">about</h2>
-    <p className="leading-relaxed text-slate-600 dark:text-slate-400">I’m Aarush Pathuri, a Freshman Computer Science & Economics student at Iowa State University. I’m passionate about software development, especially in Python, and have built projects like "Bookster," a community textbook exchange for Iowa State students. I also serve as the Vice President for the Iowa State University Algorithmic Club, merging my interests in coding and economic analysis. When I’m not coding or analyzing market trends, I’m likely on the tennis court or working as a certified US Chess Club Tournament Director.</p>
+    <p className="leading-relaxed text-slate-600 dark:text-slate-400">I’m Aarush. I find myself at the crossroads of competition and calculation.</p>
   </div>
 );
 
 const Now = ({ theme }) => (
   <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-2xl relative z-10">
     <h2 className="text-2xl font-semibold mb-6">what i'm doing now</h2>
-    <p className="text-slate-600 dark:text-slate-400">Right now, I'm focused on my roles at Iowa State, leading the Algorithmic Club and refining my software projects. I'm also preparing for upcoming chess tournaments and staying active with tennis.</p>
-  </div>
-);
-
-const WanderPlaceholder = ({ theme }) => (
-  <div className="flex flex-col items-center justify-center min-h-[30vh] text-center relative z-10">
-    <p className="text-lg italic font-serif">idk i havent made it this far yet</p>
+    <p className="text-slate-600 dark:text-slate-400">Developing custom dashboards and catching up on movies.</p>
   </div>
 );
 
 export default function App() {
-  const [theme, setTheme] = useState('light'); 
-  const [weatherType, setWeatherType] = useState('none');
+  const [theme, setTheme] = useState('light');
+  const [weather, setWeather] = useState('none');
   const location = useLocation();
 
   useEffect(() => {
     const root = document.documentElement;
-    const body = document.body;
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (!metaThemeColor) {
-      metaThemeColor = document.createElement('meta');
-      metaThemeColor.setAttribute('name', 'theme-color');
-      document.head.appendChild(metaThemeColor);
-    }
-    if (theme === 'dark') {
-      root.classList.add('dark');
-      root.style.background = '#0a0a0a'; 
-      body.style.background = '#0a0a0a';
-      metaThemeColor.setAttribute('content', '#0a0a0a');
-    } else if (theme === 'sunset') {
-      root.classList.remove('dark');
-      root.style.backgroundColor = '#fffcf0';
-      root.style.backgroundImage = 'linear-gradient(to bottom, #fffcf0, #fdf2f0, #fce4ec)';
-      body.style.background = 'transparent';
-      metaThemeColor.setAttribute('content', '#fffcf0');
-    } else {
-      root.classList.remove('dark');
-      root.style.background = '#fcfaf2';
-      body.style.background = '#fcfaf2';
-      metaThemeColor.setAttribute('content', '#fcfaf2');
-    }
+    root.style.backgroundColor = theme === 'dark' ? '#0a0a0a' : theme === 'sunset' ? '#fffcf0' : '#fcfaf2';
+    if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
   }, [theme]);
 
-  useEffect(() => { window.scrollTo(0, 0); }, [location.pathname]);
+  useEffect(() => window.scrollTo(0, 0), [location.pathname]);
 
-  const cycleTheme = () => {
-    const themes = ['light', 'sunset', 'dark'];
-    setTheme(themes[(themes.indexOf(theme) + 1) % themes.length]);
-  };
-
-  const cycleWeather = () => {
-    const types = ['none', 'rain', 'snow'];
-    setWeatherType(types[(types.indexOf(weatherType) + 1) % types.length]);
-  };
-
-  const getThemeStyles = () => {
-    if (theme === 'dark') return 'bg-[#0a0a0a] text-slate-300';
-    if (theme === 'sunset') return 'bg-gradient-to-b from-[#fffcf0] via-[#fdf2f0] to-[#fce4ec] text-[#4a3733]';
-    return 'bg-[#fcfaf2] text-slate-700';
-  };
+  const cycleTheme = () => setTheme(['light', 'sunset', 'dark'][(['light', 'sunset', 'dark'].indexOf(theme) + 1) % 3]);
+  const cycleWeather = () => setWeather(['none', 'rain', 'snow'][(['none', 'rain', 'snow'].indexOf(weather) + 1) % 3]);
 
   return (
-    <div className={`min-h-screen transition-all duration-700 ${getThemeStyles()}`}>
-      <WeatherEffect theme={theme} type={weatherType} />
+    <div className={`min-h-screen transition-all duration-700 ${theme === 'dark' ? 'bg-[#0a0a0a] text-slate-300' : theme === 'sunset' ? 'bg-[#fffcf0] text-[#4a3733]' : 'bg-[#fcfaf2] text-slate-700'}`}>
+      <WeatherEffect theme={theme} type={weather} />
       <div className="max-w-3xl mx-auto px-6 py-10 relative z-10">
         <header className="flex items-center justify-between mb-12">
           <Navbar theme={theme} />
-          <div className="flex items-center gap-2">
-            <button onClick={cycleWeather} className="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 text-slate-400">{weatherType === 'rain' ? <CloudRain size={18} /> : weatherType === 'snow' ? <CloudSnow size={18} /> : <Cloud size={18} />}</button>
-            <button onClick={cycleTheme} className="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 text-slate-400">{theme === 'light' ? <Sun size={18} /> : theme === 'sunset' ? <Sunrise size={18} /> : <Moon size={18} />}</button>
+          <div className="flex gap-2">
+            <button onClick={cycleWeather} className="p-2 text-slate-400 hover:text-slate-900">{weather === 'none' ? <Cloud size={18}/> : weather === 'rain' ? <CloudRain size={18}/> : <CloudSnow size={18}/>}</button>
+            <button onClick={cycleTheme} className="p-2 text-slate-400 hover:text-slate-900">{theme === 'light' ? <Sun size={18}/> : theme === 'sunset' ? <Sunrise size={18}/> : <Moon size={18}/>}</button>
           </div>
         </header>
-        <main className="min-h-[50vh]">
-          <Routes>
-            <Route path="/" element={<Home theme={theme} posts={posts} />} />
-            <Route path="/about" element={<About theme={theme} />} />
-            <Route path="/blog" element={<Blog theme={theme} posts={posts} />} />
-            <Route path="/blog/:id" element={<Article theme={theme} posts={posts} />} />
-            <Route path="/now" element={<Now theme={theme} />} />
-            <Route path="/films" element={<FilmLog theme={theme} />} />
-            <Route path="/colophon" element={<Colophon theme={theme} />} />
-            <Route path="/wander" element={<WanderPlaceholder theme={theme} />} />
-          </Routes>
-        </main>
-        <footer className={`mt-20 pt-8 border-t flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px] uppercase tracking-widest font-mono text-slate-400">
-            <Link to="/colophon" className="hover:text-slate-900 dark:hover:text-white transition-colors">colophon</Link>
-            <span className="opacity-50">changelog</span>
-            <span className="opacity-50">rss</span>
-          </div>
-          <div className="flex items-center gap-4 text-[11px] uppercase tracking-widest font-mono text-slate-400">
-            <span className="flex items-center gap-1"><MapPin size={10} /> bloomington, 2026</span>
-          </div>
+        <main><Routes>
+          <Route path="/" element={<Home theme={theme} posts={posts} />} />
+          <Route path="/about" element={<About theme={theme} />} />
+          <Route path="/blog" element={<div className="animate-in fade-in slide-in-from-bottom-2 duration-700 z-10 relative"><h2 className="text-2xl font-semibold mb-10">writing</h2>{posts?.map(p => <WritingItem key={p.id} {...p} theme={theme} />)}</div>} />
+          <Route path="/blog/:id" element={<Article theme={theme} posts={posts} />} />
+          <Route path="/now" element={<Now theme={theme} />} />
+          <Route path="/films" element={<div className="animate-in fade-in slide-in-from-bottom-2 duration-700 z-10 relative"><h2 className="text-2xl font-semibold mb-10">film log</h2>{films.map(f => (
+            <div key={f.id} className="flex gap-6 mb-12 group">
+              <img src={f.image} alt={f.title} className="w-24 h-36 rounded-lg object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+              <div><div className="flex items-center gap-3 mb-2"><h3 className="font-medium">{f.title}</h3><span className="text-xs text-slate-400">{f.year}</span><RatingStars rating={f.rating} theme={theme} /></div><p className="text-sm text-slate-500 leading-relaxed">{f.review}</p></div>
+            </div>
+          ))}</div>} />
+          <Route path="/wander" element={<div className="flex h-[30vh] items-center justify-center italic">idk i havent made it this far yet</div>} />
+        </Routes></main>
+        <footer className="mt-20 pt-8 border-t border-slate-200 dark:border-slate-800 flex justify-between text-[11px] uppercase tracking-widest font-mono text-slate-400">
+          <div className="flex gap-6"><span>colophon</span><span className="opacity-50">rss</span></div>
+          <span className="flex items-center gap-1"><MapPin size={10} /> bloomington, 2026</span>
         </footer>
       </div>
     </div>
