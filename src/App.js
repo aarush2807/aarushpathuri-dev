@@ -23,15 +23,100 @@ import {
   ChevronDown,
   Star,
   StarHalf,
-  ExternalLink
+  ExternalLink,
+  Copy,
+  Check
 } from 'lucide-react';
-
-import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import posts from './posts.json';
 import films from './films.json';
+
+// --- Custom Markdown Renderer ---
+
+const MarkdownRenderer = ({ content, theme }) => {
+  // Regex to split content by code blocks
+  const parts = content.split(/(```[\s\S]*?```)/g);
+
+  return (
+    <div className="space-y-6">
+      {parts.map((part, index) => {
+        if (part.startsWith('```')) {
+          // Handle Code Block
+          const match = part.match(/```(\w+)?\n([\s\S]*?)```/);
+          const language = match ? match[1] : '';
+          const code = match ? match[2] : part.slice(3, -3);
+
+          return (
+            <div key={index} className="relative group rounded-lg overflow-hidden my-6 text-sm">
+              <div className={`flex items-center justify-between px-4 py-2 text-xs font-mono uppercase tracking-wider ${
+                theme === 'dark' ? 'bg-slate-800 text-slate-400' : 
+                theme === 'sunset' ? 'bg-[#eaddd7] text-[#6d5a56]' : 
+                'bg-slate-200 text-slate-500'
+              }`}>
+                <span>{language || 'text'}</span>
+              </div>
+              <div className={`overflow-x-auto p-4 font-mono leading-relaxed ${
+                theme === 'dark' ? 'bg-[#1e1e1e] text-blue-200' : 
+                theme === 'sunset' ? 'bg-[#fff8f0] border border-orange-100 text-[#5c4a45]' : 
+                'bg-slate-50 text-slate-800 border border-slate-200'
+              }`}>
+                <pre style={{ margin: 0 }}>
+                  {code}
+                </pre>
+              </div>
+            </div>
+          );
+        } else {
+          // Handle Regular Text (Headers, Bold, Paragraphs)
+          return part.split('\n\n').map((block, i) => {
+            if (!block.trim()) return null;
+
+            // Headers (###)
+            if (block.startsWith('### ')) {
+              return (
+                <h3 key={`${index}-${i}`} className={`text-xl font-semibold mt-8 mb-4 tracking-tight ${
+                  theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'
+                }`}>
+                  {block.replace('### ', '')}
+                </h3>
+              );
+            }
+
+            // Bold text parsing (**text**)
+            const parseBold = (text) => {
+              const parts = text.split(/(\*\*.*?\*\*)/g);
+              return parts.map((segment, j) => {
+                if (segment.startsWith('**') && segment.endsWith('**')) {
+                  return <strong key={j} className={theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}>{segment.slice(2, -2)}</strong>;
+                }
+                // Inline code parsing (`text`) within non-bold segments
+                const codeParts = segment.split(/(`.*?`)/g);
+                return codeParts.map((subSegment, k) => {
+                    if (subSegment.startsWith('`') && subSegment.endsWith('`')) {
+                        return <code key={`${j}-${k}`} className={`px-1.5 py-0.5 rounded text-sm font-mono ${
+                            theme === 'dark' ? 'bg-slate-800 text-blue-300' : 
+                            theme === 'sunset' ? 'bg-orange-100 text-[#4a3733]' : 
+                            'bg-slate-100 text-slate-700'
+                        }`}>{subSegment.slice(1, -1)}</code>;
+                    }
+                    return subSegment;
+                });
+              });
+            };
+
+            return (
+              <p key={`${index}-${i}`} className={`leading-relaxed mb-4 ${
+                theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-300'
+              }`}>
+                {parseBold(block)}
+              </p>
+            );
+          });
+        }
+      })}
+    </div>
+  );
+};
 
 // --- Helper Components ---
 
@@ -241,7 +326,7 @@ const Colophon = ({ theme }) => (
       <section>
         <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>deployment</h3>
         <p className="text-sm">Hosted on Vercel with continuous deployment from GitHub.</p>
-        <a href="https://github.com/aarush2807/aarushpathuri-dev" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline">
+        <a href="[https://github.com/aarush2807/aarushpathuri-dev](https://github.com/aarush2807/aarushpathuri-dev)" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline">
           <Github size={14} /> View on GitHub <ExternalLink size={10} className="opacity-50" />
         </a>
       </section>
@@ -266,8 +351,8 @@ const Home = ({ theme, posts }) => (
       <h2 className={`text-xs uppercase tracking-[0.2em] font-bold text-slate-400 mb-8 border-b pb-2 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>elsewhere</h2>
       <div className="flex flex-wrap gap-6">
         <a href="mailto:aarushvpathuri2807@gmail.com" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-orange-500' : 'text-slate-400 hover:text-blue-500'}`}><Mail className="w-4 h-4" /> email</a>
-        <a href="https://github.com/aarush2807" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><Github className="w-4 h-4" /> github</a>
-        <a href="https://www.linkedin.com/in/aarush-pathuri-b943b0265/" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-700' : 'text-slate-400 hover:text-blue-700'}`}><Linkedin className="w-4 h-4" /> linkedin</a>
+        <a href="[https://github.com/aarush2807](https://github.com/aarush2807)" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><Github className="w-4 h-4" /> github</a>
+        <a href="[https://www.linkedin.com/in/aarush-pathuri-b943b0265/](https://www.linkedin.com/in/aarush-pathuri-b943b0265/)" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-700' : 'text-slate-400 hover:text-blue-700'}`}><Linkedin className="w-4 h-4" /> linkedin</a>
       </div>
     </section>
   </div>
@@ -291,30 +376,8 @@ const Article = ({ theme, posts }) => {
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tighter mb-4">{post.title}</h1>
       </div>
-      <div className="prose prose-slate dark:prose-invert max-w-none leading-relaxed">
-        <ReactMarkdown
-          components={{
-            code({ node, inline, className, children, ...props }) {
-              const match = /language-(\w+)/.exec(className || '');
-              return !inline && match ? (
-                <SyntaxHighlighter
-                  style={oneDark}
-                  language={match[1]}
-                  PreTag="div"
-                  {...props}
-                >
-                  {String(children).replace(/\n$/, '')}
-                </SyntaxHighlighter>
-              ) : (
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              );
-            }
-          }}
-        >
-          {post.content}
-        </ReactMarkdown>
+      <div className="prose prose-slate dark:prose-invert max-w-none">
+        <MarkdownRenderer content={post.content} theme={theme} />
       </div>
     </div>
   );
@@ -330,7 +393,7 @@ const FilmLog = ({ theme }) => (
       {films.map((film) => (
         <div key={film.id} className="flex flex-col md:flex-row gap-6 group">
           <div className="w-full md:w-32 aspect-[2/3] overflow-hidden rounded-lg bg-slate-200 relative shrink-0">
-            <img src={film.image} alt={film.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" onError={(e) => { e.target.src = 'https://via.placeholder.com/200x300?text=No+Poster'; }} />
+            <img src={film.image} alt={film.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" onError={(e) => { e.target.src = '[https://via.placeholder.com/200x300?text=No+Poster](https://via.placeholder.com/200x300?text=No+Poster)'; }} />
           </div>
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-x-3 mb-2">
