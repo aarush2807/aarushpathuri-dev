@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Routes, 
-  Route, 
-  Link, 
-  useNavigate, 
-  useLocation, 
-  useParams 
+import {
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+  useLocation,
+  useParams
 } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  Mail, 
-  Github, 
-  Linkedin, 
-  MapPin, 
+import {
+  ArrowRight,
+  Mail,
+  Github,
+  Linkedin,
+  MapPin,
   Sun,
   Moon,
   Cloud,
@@ -32,7 +32,6 @@ import films from './films.json';
 // --- Custom Markdown Renderer ---
 
 const MarkdownRenderer = ({ content, theme }) => {
-  // Splits content by code blocks first
   const parts = content.split(/(```[\s\S]*?```)/g);
 
   return (
@@ -46,25 +45,22 @@ const MarkdownRenderer = ({ content, theme }) => {
           return (
             <div key={index} className="relative group rounded-lg overflow-hidden my-6 text-sm">
               <div className={`flex items-center justify-between px-4 py-2 text-xs font-mono uppercase tracking-wider ${
-                theme === 'dark' ? 'bg-slate-800 text-slate-400' : 
-                theme === 'sunset' ? 'bg-[#eaddd7] text-[#6d5a56]' : 
+                theme === 'dark' ? 'bg-slate-800 text-slate-400' :
+                theme === 'sunset' ? 'bg-[#eaddd7] text-[#6d5a56]' :
                 'bg-slate-200 text-slate-500'
               }`}>
                 <span>{language || 'text'}</span>
               </div>
               <div className={`overflow-x-auto p-4 font-mono leading-relaxed ${
-                theme === 'dark' ? 'bg-[#1e1e1e] text-blue-200' : 
-                theme === 'sunset' ? 'bg-[#fff8f0] border border-orange-100 text-[#5c4a45]' : 
+                theme === 'dark' ? 'bg-[#1e1e1e] text-blue-200' :
+                theme === 'sunset' ? 'bg-[#fff8f0] border border-orange-100 text-[#5c4a45]' :
                 'bg-slate-50 text-slate-800 border border-slate-200'
               }`}>
-                <pre style={{ margin: 0 }}>
-                  {code}
-                </pre>
+                <pre style={{ margin: 0 }}>{code}</pre>
               </div>
             </div>
           );
         } else {
-          // Process paragraphs and headers
           return part.split('\n\n').map((block, i) => {
             if (!block.trim()) return null;
 
@@ -78,36 +74,29 @@ const MarkdownRenderer = ({ content, theme }) => {
               );
             }
 
-            // Precise parsing for images, **bold** and `code`
             const parseInline = (text) => {
-              // First handle images: ![alt](url)
               const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
               const parts = text.split(imageRegex);
-              
+
               return parts.map((part, idx) => {
-                // Every third item starting from index 2 is an image URL
                 if (idx % 3 === 2) {
                   const alt = parts[idx - 1];
                   const url = part;
                   return (
-                    <img 
+                    <img
                       key={idx}
-                      src={url} 
+                      src={url}
                       alt={alt}
                       className={`w-full rounded-lg my-6 ${
-                        theme === 'dark' ? 'border border-slate-800' : 
-                        theme === 'sunset' ? 'border border-orange-100' : 
+                        theme === 'dark' ? 'border border-slate-800' :
+                        theme === 'sunset' ? 'border border-orange-100' :
                         'border border-slate-200'
                       }`}
                     />
                   );
                 }
-                // Every third item starting from index 1 is alt text (skip it)
-                if (idx % 3 === 1) {
-                  return null;
-                }
-                
-                // For remaining text, parse bold and code
+                if (idx % 3 === 1) return null;
+
                 const inlineRegex = /(\*\*.*?\*\*|`.*?`)/g;
                 const segments = part.split(inlineRegex);
                 return segments.map((segment, j) => {
@@ -121,8 +110,8 @@ const MarkdownRenderer = ({ content, theme }) => {
                   if (segment.startsWith('`') && segment.endsWith('`')) {
                     return (
                       <code key={`${idx}-${j}`} className={`px-1.5 py-0.5 rounded text-sm font-mono ${
-                        theme === 'dark' ? 'bg-slate-800 text-blue-300' : 
-                        theme === 'sunset' ? 'bg-orange-100 text-[#4a3733]' : 
+                        theme === 'dark' ? 'bg-slate-800 text-blue-300' :
+                        theme === 'sunset' ? 'bg-orange-100 text-[#4a3733]' :
                         'bg-slate-100 text-slate-700'
                       }`}>
                         {segment.slice(1, -1)}
@@ -148,6 +137,133 @@ const MarkdownRenderer = ({ content, theme }) => {
   );
 };
 
+// --- Comments Component ---
+
+const Comments = ({ postId, theme }) => {
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetchComments();
+  }, [postId]);
+
+  const fetchComments = async () => {
+    try {
+      const res = await fetch(`/api/comments/get?postId=${postId}`);
+      const data = await res.json();
+      setComments(data.comments || []);
+    } catch (error) {
+      console.error('Failed to fetch comments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/comments/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, text: newComment })
+      });
+      const data = await res.json();
+      setComments([...comments, data.comment]);
+      setNewComment('');
+    } catch (error) {
+      console.error('Failed to post comment:', error);
+      alert('Failed to post comment. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+    return `${Math.floor(diffMins / 1440)}d ago`;
+  };
+
+  return (
+    <div className="mt-16 pt-8 border-t border-slate-200 dark:border-slate-800">
+      <h3 className={`text-lg font-semibold mb-6 ${theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}`}>
+        Comments ({comments.length})
+      </h3>
+
+      <form onSubmit={handleSubmit} className="mb-8">
+        <textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Share your thoughts... (you'll post as anon)"
+          className={`w-full p-3 rounded-lg border resize-none focus:outline-none focus:ring-2 ${
+            theme === 'dark'
+              ? 'bg-slate-900 border-slate-700 text-white focus:ring-blue-500'
+              : theme === 'sunset'
+                ? 'bg-[#fffcf0] border-orange-200 text-[#4a3733] focus:ring-orange-400'
+                : 'bg-white border-slate-300 text-slate-900 focus:ring-blue-500'
+          }`}
+          rows={3}
+          disabled={submitting}
+        />
+        <button
+          type="submit"
+          disabled={submitting || !newComment.trim()}
+          className={`mt-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            theme === 'sunset'
+              ? 'bg-orange-400 text-white hover:bg-orange-500 disabled:bg-orange-200'
+              : 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700'
+          }`}
+        >
+          {submitting ? 'Posting...' : 'Post Comment'}
+        </button>
+      </form>
+
+      {loading ? (
+        <p className="text-slate-400 text-sm">Loading comments...</p>
+      ) : comments.length === 0 ? (
+        <p className="text-slate-400 text-sm italic">No comments yet. Be the first to share your thoughts!</p>
+      ) : (
+        <div className="space-y-4">
+          {comments.map((comment) => (
+            <div
+              key={comment.id}
+              className={`p-4 rounded-lg ${
+                theme === 'dark'
+                  ? 'bg-slate-900'
+                  : theme === 'sunset'
+                    ? 'bg-[#fff8f0]'
+                    : 'bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`text-sm font-medium ${theme === 'sunset' ? 'text-orange-500' : 'text-blue-600 dark:text-blue-400'}`}>
+                  {comment.author}
+                </span>
+                <span className="text-xs text-slate-400">•</span>
+                <span className="text-xs text-slate-400">{formatDate(comment.timestamp)}</span>
+              </div>
+              <p className={`text-sm leading-relaxed ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-300'}`}>
+                {comment.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // --- Helper Components ---
 
 const RatingStars = ({ rating, theme }) => {
@@ -165,18 +281,18 @@ const RatingStars = ({ rating, theme }) => {
 
 const WeatherEffect = ({ theme, type }) => {
   const canvasRef = useRef(null);
-  
+
   useEffect(() => {
     if (type === 'none') return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     let animationFrameId;
 
-    const resize = () => { 
-      canvas.width = window.innerWidth; 
-      canvas.height = window.innerHeight; 
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
-    
+
     window.addEventListener('resize', resize);
     resize();
 
@@ -213,7 +329,7 @@ const WeatherEffect = ({ theme, type }) => {
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       particles.forEach(p => {
         ctx.beginPath();
         if (type === 'rain') {
@@ -245,9 +361,9 @@ const WeatherEffect = ({ theme, type }) => {
     };
 
     draw();
-    return () => { 
-      window.removeEventListener('resize', resize); 
-      cancelAnimationFrame(animationFrameId); 
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animationFrameId);
     };
   }, [theme, type]);
 
@@ -314,9 +430,9 @@ const Navbar = ({ theme }) => {
             key={item.id}
             to={item.path}
             className={`text-sm tracking-tight transition-colors duration-200 font-medium underline-offset-4 ${
-              item.brand 
+              item.brand
                 ? theme === 'dark' ? 'text-white' : theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900'
-                : location.pathname === item.path 
+                : location.pathname === item.path
                   ? (theme === 'dark' ? 'text-white underline' : theme === 'sunset' ? 'text-[#4a3733] underline' : 'text-slate-900 underline')
                   : theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
             }`}
@@ -325,13 +441,21 @@ const Navbar = ({ theme }) => {
           </Link>
         ))}
         <div className="relative" ref={dropdownRef}>
-          <button onClick={() => setIsWanderOpen(!isWanderOpen)} className={`text-sm tracking-tight transition-colors duration-200 font-medium flex items-center gap-1 ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
+          <button
+            onClick={() => setIsWanderOpen(!isWanderOpen)}
+            className={`text-sm tracking-tight transition-colors duration-200 font-medium flex items-center gap-1 ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}
+          >
             wander <ChevronDown size={14} className={`transition-transform duration-200 ${isWanderOpen ? 'rotate-180' : ''}`} />
           </button>
           {isWanderOpen && (
             <div className={`absolute left-0 mt-2 w-48 rounded-xl shadow-xl border p-2 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 ${theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : theme === 'sunset' ? 'bg-[#fffcf0]/90 border-orange-100' : 'bg-white/90 border-slate-200'}`}>
               {wanderLinks.map((item, idx) => (
-                <Link key={idx} to={item.path} onClick={() => setIsWanderOpen(false)} className={`block px-3 py-2 text-xs rounded-lg transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:bg-orange-50 hover:text-[#4a3733]' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white'}`}>
+                <Link
+                  key={idx}
+                  to={item.path}
+                  onClick={() => setIsWanderOpen(false)}
+                  className={`block px-3 py-2 text-xs rounded-lg transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:bg-orange-50 hover:text-[#4a3733]' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white'}`}
+                >
                   {item.label}
                 </Link>
               ))}
@@ -356,7 +480,7 @@ const Colophon = ({ theme }) => (
       <section>
         <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>deployment</h3>
         <p className="text-sm">The site is hosted on Vercel. It is continuously deployed from a GitHub repository, ensuring that every push to the main branch is instantly live. This setup provides a fast, edge-cached experience worldwide.</p>
-        <a href="https://github.com/aarush2807/aarushpathuri-dev" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline">
+        <a href="[https://github.com/aarush2807/aarushpathuri-dev](https://github.com/aarush2807/aarushpathuri-dev)" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline">
           <Github size={14} /> View on GitHub <ExternalLink size={10} className="opacity-50" />
         </a>
       </section>
@@ -393,8 +517,8 @@ const Home = ({ theme, posts }) => (
       <h2 className={`text-xs uppercase tracking-[0.2em] font-bold text-slate-400 mb-8 border-b pb-2 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>elsewhere</h2>
       <div className="flex flex-wrap gap-6">
         <a href="mailto:aarushvpathuri2807@gmail.com" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-orange-500' : 'text-slate-400 hover:text-blue-500'}`}><Mail className="w-4 h-4" /> email</a>
-        <a href="https://github.com/aarush2807" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><Github className="w-4 h-4" /> github</a>
-        <a href="https://www.linkedin.com/in/aarush-pathuri-b943b0265/" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-700' : 'text-slate-400 hover:text-blue-700'}`}><Linkedin className="w-4 h-4" /> linkedin</a>
+        <a href="[https://github.com/aarush2807](https://github.com/aarush2807)" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><Github className="w-4 h-4" /> github</a>
+        <a href="[https://www.linkedin.com/in/aarush-pathuri-b943b0265/](https://www.linkedin.com/in/aarush-pathuri-b943b0265/)" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-700' : 'text-slate-400 hover:text-blue-700'}`}><Linkedin className="w-4 h-4" /> linkedin</a>
       </div>
     </section>
   </div>
@@ -421,6 +545,7 @@ const Article = ({ theme, posts }) => {
       <div className="prose prose-slate dark:prose-invert max-w-none font-normal">
         <MarkdownRenderer content={post.content} theme={theme} />
       </div>
+      <Comments postId={id} theme={theme} />
     </div>
   );
 };
@@ -435,7 +560,12 @@ const FilmLog = ({ theme }) => (
       {films.map((film) => (
         <div key={film.id} className="flex flex-col md:flex-row gap-6 group">
           <div className="w-full md:w-32 aspect-[2/3] overflow-hidden rounded-lg bg-slate-200 relative shrink-0">
-            <img src={film.image} alt={film.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" onError={(e) => { e.target.src = 'https://via.placeholder.com/200x300?text=No+Poster'; }} />
+            <img
+              src={film.image}
+              alt={film.title}
+              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+              onError={(e) => { e.target.src = '[https://via.placeholder.com/200x300?text=No+Poster](https://via.placeholder.com/200x300?text=No+Poster)'; }}
+            />
           </div>
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-x-3 mb-2">
@@ -472,7 +602,7 @@ const WanderPlaceholder = ({ theme }) => (
 );
 
 export default function App() {
-  const [theme, setTheme] = useState('light'); 
+  const [theme, setTheme] = useState('light');
   const [weatherType, setWeatherType] = useState('none');
   const location = useLocation();
 
@@ -487,7 +617,7 @@ export default function App() {
     }
     if (theme === 'dark') {
       root.classList.add('dark');
-      root.style.background = '#0a0a0a'; 
+      root.style.background = '#0a0a0a';
       body.style.background = '#0a0a0a';
       metaThemeColor.setAttribute('content', '#0a0a0a');
     } else if (theme === 'sunset') {
@@ -529,8 +659,12 @@ export default function App() {
         <header className="flex items-center justify-between mb-12">
           <Navbar theme={theme} />
           <div className="flex items-center gap-2">
-            <button onClick={cycleWeather} className="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 text-slate-400">{weatherType === 'rain' ? <CloudRain size={18} /> : weatherType === 'snow' ? <CloudSnow size={18} /> : <Cloud size={18} />}</button>
-            <button onClick={cycleTheme} className="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 text-slate-400">{theme === 'light' ? <Sun size={18} /> : theme === 'sunset' ? <Sunrise size={18} /> : <Moon size={18} />}</button>
+            <button onClick={cycleWeather} className="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 text-slate-400">
+              {weatherType === 'rain' ? <CloudRain size={18} /> : weatherType === 'snow' ? <CloudSnow size={18} /> : <Cloud size={18} />}
+            </button>
+            <button onClick={cycleTheme} className="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 text-slate-400">
+              {theme === 'light' ? <Sun size={18} /> : theme === 'sunset' ? <Sunrise size={18} /> : <Moon size={18} />}
+            </button>
           </div>
         </header>
         <main className="min-h-[50vh]">
