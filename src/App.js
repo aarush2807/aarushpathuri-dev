@@ -32,6 +32,7 @@ import films from './films.json';
 // --- Custom Markdown Renderer ---
 
 const MarkdownRenderer = ({ content, theme }) => {
+  // Splits content by code blocks first
   const parts = content.split(/(```[\s\S]*?```)/g);
 
   return (
@@ -63,6 +64,7 @@ const MarkdownRenderer = ({ content, theme }) => {
             </div>
           );
         } else {
+          // Process paragraphs and headers
           return part.split('\n\n').map((block, i) => {
             if (!block.trim()) return null;
 
@@ -76,29 +78,59 @@ const MarkdownRenderer = ({ content, theme }) => {
               );
             }
 
+            // Precise parsing for images, **bold** and `code`
             const parseInline = (text) => {
-              const regex = /(\*\*.*?\*\*|`.*?`)/g;
-              const segments = text.split(regex);
-              return segments.map((segment, j) => {
-                if (segment.startsWith('**') && segment.endsWith('**')) {
+              // First handle images: ![alt](url)
+              const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+              const parts = text.split(imageRegex);
+              
+              return parts.map((part, idx) => {
+                // Every third item starting from index 2 is an image URL
+                if (idx % 3 === 2) {
+                  const alt = parts[idx - 1];
+                  const url = part;
                   return (
-                    <strong key={j} className={`font-bold ${theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}`}>
-                      {segment.slice(2, -2)}
-                    </strong>
+                    <img 
+                      key={idx}
+                      src={url} 
+                      alt={alt}
+                      className={`w-full rounded-lg my-6 ${
+                        theme === 'dark' ? 'border border-slate-800' : 
+                        theme === 'sunset' ? 'border border-orange-100' : 
+                        'border border-slate-200'
+                      }`}
+                    />
                   );
                 }
-                if (segment.startsWith('`') && segment.endsWith('`')) {
-                  return (
-                    <code key={j} className={`px-1.5 py-0.5 rounded text-sm font-mono ${
-                      theme === 'dark' ? 'bg-slate-800 text-blue-300' : 
-                      theme === 'sunset' ? 'bg-orange-100 text-[#4a3733]' : 
-                      'bg-slate-100 text-slate-700'
-                    }`}>
-                      {segment.slice(1, -1)}
-                    </code>
-                  );
+                // Every third item starting from index 1 is alt text (skip it)
+                if (idx % 3 === 1) {
+                  return null;
                 }
-                return segment;
+                
+                // For remaining text, parse bold and code
+                const inlineRegex = /(\*\*.*?\*\*|`.*?`)/g;
+                const segments = part.split(inlineRegex);
+                return segments.map((segment, j) => {
+                  if (segment.startsWith('**') && segment.endsWith('**')) {
+                    return (
+                      <strong key={`${idx}-${j}`} className={`font-bold ${theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}`}>
+                        {segment.slice(2, -2)}
+                      </strong>
+                    );
+                  }
+                  if (segment.startsWith('`') && segment.endsWith('`')) {
+                    return (
+                      <code key={`${idx}-${j}`} className={`px-1.5 py-0.5 rounded text-sm font-mono ${
+                        theme === 'dark' ? 'bg-slate-800 text-blue-300' : 
+                        theme === 'sunset' ? 'bg-orange-100 text-[#4a3733]' : 
+                        'bg-slate-100 text-slate-700'
+                      }`}>
+                        {segment.slice(1, -1)}
+                      </code>
+                    );
+                  }
+                  return segment;
+                });
               });
             };
 
@@ -324,7 +356,7 @@ const Colophon = ({ theme }) => (
       <section>
         <h3 className={`text-sm uppercase tracking-widest font-bold mb-3 ${theme === 'sunset' ? 'text-orange-400' : 'text-slate-400'}`}>deployment</h3>
         <p className="text-sm">The site is hosted on Vercel. It is continuously deployed from a GitHub repository, ensuring that every push to the main branch is instantly live. This setup provides a fast, edge-cached experience worldwide.</p>
-        <a href="[https://github.com/aarush2807/aarushpathuri-dev](https://github.com/aarush2807/aarushpathuri-dev)" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline">
+        <a href="https://github.com/aarush2807/aarushpathuri-dev" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 text-xs font-mono hover:underline">
           <Github size={14} /> View on GitHub <ExternalLink size={10} className="opacity-50" />
         </a>
       </section>
@@ -360,9 +392,9 @@ const Home = ({ theme, posts }) => (
     <section className="mb-12">
       <h2 className={`text-xs uppercase tracking-[0.2em] font-bold text-slate-400 mb-8 border-b pb-2 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>elsewhere</h2>
       <div className="flex flex-wrap gap-6">
-        <Link to="/email" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-orange-500' : 'text-slate-400 hover:text-blue-500'}`}><Mail className="w-4 h-4" /> email</Link>
-        <a href="[https://github.com/aarush2807](https://github.com/aarush2807)" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><Github className="w-4 h-4" /> github</a>
-        <a href="[https://www.linkedin.com/in/aarush-pathuri-b943b0265/](https://www.linkedin.com/in/aarush-pathuri-b943b0265/)" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-700' : 'text-slate-400 hover:text-blue-700'}`}><Linkedin className="w-4 h-4" /> linkedin</a>
+        <a href="mailto:aarushvpathuri2807@gmail.com" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-orange-500' : 'text-slate-400 hover:text-blue-500'}`}><Mail className="w-4 h-4" /> email</a>
+        <a href="https://github.com/aarush2807" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><Github className="w-4 h-4" /> github</a>
+        <a href="https://www.linkedin.com/in/aarush-pathuri-b943b0265/" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-700' : 'text-slate-400 hover:text-blue-700'}`}><Linkedin className="w-4 h-4" /> linkedin</a>
       </div>
     </section>
   </div>
@@ -403,7 +435,7 @@ const FilmLog = ({ theme }) => (
       {films.map((film) => (
         <div key={film.id} className="flex flex-col md:flex-row gap-6 group">
           <div className="w-full md:w-32 aspect-[2/3] overflow-hidden rounded-lg bg-slate-200 relative shrink-0">
-            <img src={film.image} alt={film.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" onError={(e) => { e.target.src = '[https://via.placeholder.com/200x300?text=No+Poster](https://via.placeholder.com/200x300?text=No+Poster)'; }} />
+            <img src={film.image} alt={film.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" onError={(e) => { e.target.src = 'https://via.placeholder.com/200x300?text=No+Poster'; }} />
           </div>
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-x-3 mb-2">
@@ -422,7 +454,7 @@ const FilmLog = ({ theme }) => (
 const About = ({ theme }) => (
   <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-2xl relative z-10">
     <h2 className="text-2xl font-semibold mb-6">about</h2>
-    <p className="leading-relaxed text-slate-600 dark:text-slate-400">I’m Aarush. I find myself at the crossroads of competition and calculation. For me, sports aren't just a pastime: they're a puzzle.</p>
+    <p className="leading-relaxed text-slate-600 dark:text-slate-400">I'm Aarush. I find myself at the crossroads of competition and calculation. For me, sports aren't just a pastime: they're a puzzle.</p>
   </div>
 );
 
@@ -430,23 +462,6 @@ const Now = ({ theme }) => (
   <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-2xl relative z-10">
     <h2 className="text-2xl font-semibold mb-6">what i'm doing now</h2>
     <p className="text-slate-600 dark:text-slate-400">Developing custom dashboards and catching up on movies.</p>
-  </div>
-);
-
-const EmailPage = ({ theme }) => (
-  <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-2xl relative z-10">
-    <h2 className="text-2xl font-semibold mb-6 tracking-tight">contact</h2>
-    <div className={`space-y-4 ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-400'}`}>
-      <p className="leading-relaxed">
-        For any questions or anything, just email:
-      </p>
-      <a 
-        href="mailto:aarushvpathuri2807@gmail.com" 
-        className={`text-lg font-medium underline underline-offset-4 transition-colors ${theme === 'sunset' ? 'text-orange-600 hover:text-orange-400' : 'text-blue-600 dark:text-blue-400'}`}
-      >
-        aarushvpathuri2807@gmail.com
-      </a>
-    </div>
   </div>
 );
 
@@ -528,7 +543,6 @@ export default function App() {
             <Route path="/films" element={<FilmLog theme={theme} />} />
             <Route path="/colophon" element={<Colophon theme={theme} />} />
             <Route path="/wander" element={<WanderPlaceholder theme={theme} />} />
-            <Route path="/email" element={<EmailPage theme={theme} />} />
           </Routes>
         </main>
         <footer className={`mt-20 pt-8 border-t flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>
