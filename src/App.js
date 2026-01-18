@@ -406,7 +406,12 @@ const FilmLog = ({ theme }) => (
       {films.map((film) => (
         <div key={film.id} className="flex flex-col md:flex-row gap-6 group">
           <div className="w-full md:w-32 aspect-[2/3] overflow-hidden rounded-lg bg-slate-200 relative shrink-0">
-            <img src={film.image} alt={film.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" onError={(e) => { e.target.src = '[https://via.placeholder.com/200x300?text=No+Poster](https://via.placeholder.com/200x300?text=No+Poster)'; }} />
+            <img 
+              src={film.image} 
+              alt={film.title} 
+              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
+              onError={(e) => { e.target.src = '[https://via.placeholder.com/200x300?text=No+Poster](https://via.placeholder.com/200x300?text=No+Poster)'; }} 
+            />
           </div>
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-x-3 mb-2">
