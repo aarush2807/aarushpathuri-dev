@@ -152,7 +152,7 @@ const Comments = ({ postId, theme }) => {
 
   const fetchComments = async () => {
     try {
-      const res = await fetch(`/api/comments/get?postId=${postId}`);
+      const res = await fetch(`/api/get-comments?postId=${postId}`);
       const data = await res.json();
       setComments(data.comments || []);
     } catch (error) {
@@ -167,7 +167,7 @@ const Comments = ({ postId, theme }) => {
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/comments/post', {
+      const res = await fetch('/api/post-comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ postId, text: newComment })
