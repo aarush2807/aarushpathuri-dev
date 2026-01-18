@@ -161,7 +161,6 @@ const Comments = ({ postId, theme }) => {
       setLoading(false);
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -173,6 +172,15 @@ const Comments = ({ postId, theme }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ postId, text: newComment })
       });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('API Error:', res.status, errorText);
+        alert(`Failed to post comment: ${res.status}`);
+        setSubmitting(false);
+        return;
+      }
+      
       const data = await res.json();
       setComments([...comments, data.comment]);
       setNewComment('');
@@ -183,7 +191,6 @@ const Comments = ({ postId, theme }) => {
       setSubmitting(false);
     }
   };
-
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
     const now = new Date();
