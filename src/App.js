@@ -137,8 +137,9 @@ const MarkdownRenderer = ({ content, theme }) => {
   );
 };
 
-// --- Comments Component ---
+// --- Comments Component (Disabled) ---
 
+/*
 const Comments = ({ postId, theme }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -147,7 +148,6 @@ const Comments = ({ postId, theme }) => {
 
   useEffect(() => {
     fetchComments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId]);
 
   const fetchComments = async () => {
@@ -271,6 +271,7 @@ const Comments = ({ postId, theme }) => {
     </div>
   );
 };
+*/
 
 // --- Helper Components ---
 
@@ -553,7 +554,7 @@ const Article = ({ theme, posts }) => {
       <div className="prose prose-slate dark:prose-invert max-w-none font-normal">
         <MarkdownRenderer content={post.content} theme={theme} />
       </div>
-      <Comments postId={id} theme={theme} />
+      {/* <Comments postId={id} theme={theme} /> */}
     </div>
   );
 };
