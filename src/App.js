@@ -137,142 +137,6 @@ const MarkdownRenderer = ({ content, theme }) => {
   );
 };
 
-// --- Comments Component (Disabled) ---
-
-/*
-const Comments = ({ postId, theme }) => {
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    fetchComments();
-  }, [postId]);
-
-  const fetchComments = async () => {
-    try {
-      const res = await fetch(`/api/get-comments?postId=${postId}`);
-      const data = await res.json();
-      setComments(data.comments || []);
-    } catch (error) {
-      console.error('Failed to fetch comments:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/post-comment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId, text: newComment })
-      });
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error('API Error:', res.status, errorText);
-        alert(`Failed to post comment: ${res.status}`);
-        setSubmitting(false);
-        return;
-      }
-      
-      const data = await res.json();
-      setComments([...comments, data.comment]);
-      setNewComment('');
-    } catch (error) {
-      console.error('Failed to post comment:', error);
-      alert('Failed to post comment. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-
-    if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-    return `${Math.floor(diffMins / 1440)}d ago`;
-  };
-
-  return (
-    <div className="mt-16 pt-8 border-t border-slate-200 dark:border-slate-800">
-      <h3 className={`text-lg font-semibold mb-6 ${theme === 'sunset' ? 'text-[#4a3733]' : 'text-slate-900 dark:text-white'}`}>
-        Comments ({comments.length})
-      </h3>
-
-      <form onSubmit={handleSubmit} className="mb-8">
-        <textarea
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Share your thoughts... (you'll post as anon)"
-          className={`w-full p-3 rounded-lg border resize-none focus:outline-none focus:ring-2 ${
-            theme === 'dark'
-              ? 'bg-slate-900 border-slate-700 text-white focus:ring-blue-500'
-              : theme === 'sunset'
-                ? 'bg-[#fffcf0] border-orange-200 text-[#4a3733] focus:ring-orange-400'
-                : 'bg-white border-slate-300 text-slate-900 focus:ring-blue-500'
-          }`}
-          rows={3}
-          disabled={submitting}
-        />
-        <button
-          type="submit"
-          disabled={submitting || !newComment.trim()}
-          className={`mt-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            theme === 'sunset'
-              ? 'bg-orange-400 text-white hover:bg-orange-500 disabled:bg-orange-200'
-              : 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700'
-          }`}
-        >
-          {submitting ? 'Posting...' : 'Post Comment'}
-        </button>
-      </form>
-
-      {loading ? (
-        <p className="text-slate-400 text-sm">Loading comments...</p>
-      ) : comments.length === 0 ? (
-        <p className="text-slate-400 text-sm italic">No comments yet. Be the first to share your thoughts!</p>
-      ) : (
-        <div className="space-y-4">
-          {comments.map((comment) => (
-            <div
-              key={comment.id}
-              className={`p-4 rounded-lg ${
-                theme === 'dark'
-                  ? 'bg-slate-900'
-                  : theme === 'sunset'
-                    ? 'bg-[#fff8f0]'
-                    : 'bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`text-sm font-medium ${theme === 'sunset' ? 'text-orange-500' : 'text-blue-600 dark:text-blue-400'}`}>
-                  {comment.author}
-                </span>
-                <span className="text-xs text-slate-400">•</span>
-                <span className="text-xs text-slate-400">{formatDate(comment.timestamp)}</span>
-              </div>
-              <p className={`text-sm leading-relaxed ${theme === 'sunset' ? 'text-[#6d5a56]' : 'text-slate-600 dark:text-slate-300'}`}>
-                {comment.text}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-*/
-
 // --- Helper Components ---
 
 const RatingStars = ({ rating, theme }) => {
@@ -526,6 +390,7 @@ const Home = ({ theme, posts }) => (
       <h2 className={`text-xs uppercase tracking-[0.2em] font-bold text-slate-400 mb-8 border-b pb-2 ${theme === 'sunset' ? 'border-orange-100' : 'border-slate-200 dark:border-slate-800'}`}>elsewhere</h2>
       <div className="flex flex-wrap gap-6">
         <a href="mailto:aarushvpathuri2807@gmail.com" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-orange-500' : 'text-slate-400 hover:text-blue-500'}`}><Mail className="w-4 h-4" /> email</a>
+        <a href="tel:3093916226" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>309-391-6226</a>
         <a href="[https://github.com/aarush2807](https://github.com/aarush2807)" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-[#4a3733]' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}><Github className="w-4 h-4" /> github</a>
         <a href="[https://www.linkedin.com/in/aarush-pathuri-b943b0265/](https://www.linkedin.com/in/aarush-pathuri-b943b0265/)" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm transition-colors ${theme === 'sunset' ? 'text-[#8c746f] hover:text-blue-700' : 'text-slate-400 hover:text-blue-700'}`}><Linkedin className="w-4 h-4" /> linkedin</a>
       </div>
@@ -554,7 +419,6 @@ const Article = ({ theme, posts }) => {
       <div className="prose prose-slate dark:prose-invert max-w-none font-normal">
         <MarkdownRenderer content={post.content} theme={theme} />
       </div>
-      {/* <Comments postId={id} theme={theme} /> */}
     </div>
   );
 };
